@@ -1,4 +1,68 @@
-# Values for the demo app (.env) and the DAE hooks
+# Values for the demo app and the DAE hooks
+
+# Configuration of the demo app (no secret):
+#   terraform output -json demo_config > ../src/config/demo.json
+# (npm run config, at the repository root)
+output "demo_config" {
+  description = "Configuration of the demo app (src/config/demo.json)."
+  value = {
+    customer = {
+      name                = var.customer.name
+      slug                = local.slug
+      logoUrl             = var.customer.logo_url
+      primaryColor        = var.customer.primary_color
+      secondaryColor      = var.customer.secondary_color
+      pageBackgroundColor = var.customer.page_background_color
+    }
+    auth0 = {
+      domain   = local.auth0_domain
+      clientId = auth0_client.spa.client_id
+      audience = auth0_resource_server.api.identifier
+    }
+    claimsNamespace = local.claims_namespace
+    connections = {
+      database     = auth0_connection.users.name
+      passwordless = var.enable_passwordless_email ? "email" : null
+    }
+    organizations = [
+      for name, org in var.organizations : {
+        id                  = auth0_organization.this[name].id
+        name                = name
+        displayName         = org.display_name
+        logoUrl             = local.organization_branding[name].logo_url
+        primaryColor        = local.organization_branding[name].primary_color
+        pageBackgroundColor = local.organization_branding[name].page_background_color
+      }
+    ]
+    roles = [for name, role in var.roles : { name = name, description = role.description }]
+    applications = [
+      for id, app in var.applications : {
+        id          = id
+        name        = app.name
+        description = app.description
+        icon        = app.icon
+        roles       = app.roles
+      }
+    ]
+    testUsers = [
+      for alias, user in var.test_users : {
+        email       = local.test_user_emails[alias]
+        name        = user.name
+        description = user.description
+        memberships = [for org, roles in user.memberships : { organization = org, roles = roles }]
+        daeRole     = lookup(user.app_metadata, "dae_role", "")
+      }
+    ]
+    webAppUrls = var.web_app_urls
+    adminUiUrl = var.admin_ui_url
+    daeUrl     = var.enable_dae ? local.dae_url : ""
+    features = {
+      passwordless = var.enable_passwordless_email
+      dae          = var.enable_dae
+      mfa          = var.mfa
+    }
+  }
+}
 
 output "spa_env" {
   description = "Variables of the demo SPA (.env)."

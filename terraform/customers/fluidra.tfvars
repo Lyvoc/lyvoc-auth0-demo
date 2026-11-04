@@ -33,30 +33,69 @@ organizations = {
   }
 }
 
+# PRO AREA applications and the roles giving access to them
+applications = {
+  esales = {
+    name        = "eSales"
+    description = "Order management and ERP integration"
+    icon        = "🛒"
+    roles       = ["buyer", "admin"]
+  }
+  mediaCenter = {
+    name        = "Media Center"
+    description = "Marketing materials and product documentation"
+    icon        = "📚"
+    roles       = ["b2b_customer", "admin"]
+  }
+  proAcademy = {
+    name        = "Pro Academy"
+    description = "Training courses and certifications"
+    icon        = "🎓"
+    roles       = ["b2b_customer", "admin"]
+  }
+  proLab = {
+    name        = "Pro Lab"
+    description = "Technical tools and diagnostics"
+    icon        = "🔬"
+    roles       = ["b2b_customer", "admin"]
+  }
+  proApp = {
+    name        = "Pro App"
+    description = "Mobile field service application"
+    icon        = "📱"
+    roles       = ["admin"]
+  }
+}
+
 # Emails: test_users_email_template (<alias>@example.com by default), never the
 # prospect's real addresses (passwordless codes and MFA emails are sent to them)
 test_users = {
   fluidra-admin = {
+    description  = "Fluidra admin, full access (DAE administrator)"
     name         = "Fluidra Admin"
     memberships  = { fluidra-es = ["admin"] }
     app_metadata = { dae_role = "Delegated Admin - Administrator", business_role = "admin" }
   }
   fluidra-customer = {
+    description  = "B2B customer persona"
     name         = "Fluidra Customer"
     memberships  = { fluidra-es = ["b2b_customer"] }
     app_metadata = { business_role = "b2b_customer" }
   }
   fluidra-multi = {
+    description  = "Buyer of the three brands"
     name         = "Multi-brand Buyer"
     memberships  = { fluidra-es = ["buyer"], grepool-es = ["buyer"], astralpool-es = ["buyer"] }
     app_metadata = { business_role = "buyer" }
   }
   grepool-buyer = {
+    description  = "Single-brand buyer"
     name         = "Grepool Buyer"
     memberships  = { grepool-es = ["buyer"] }
     app_metadata = { business_role = "buyer" }
   }
   grepool-admin = {
+    description  = "Grepool admin, scoped DAE administrator"
     name         = "Grepool Admin"
     memberships  = { grepool-es = ["admin"] }
     app_metadata = { dae_role = "Delegated Admin - Administrator", business_role = "admin" }

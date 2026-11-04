@@ -9,10 +9,10 @@ resource "auth0_organization" "this" {
   }
 
   branding {
-    logo_url = coalesce(each.value.logo_url, var.customer.logo_url, "https://cdn.auth0.com/styleguide/components/1.0.8/media/logos/img/badge.png")
+    logo_url = local.organization_branding[each.key].logo_url
     colors = {
-      primary         = coalesce(each.value.primary_color, var.customer.primary_color)
-      page_background = coalesce(each.value.page_background_color, var.customer.page_background_color)
+      primary         = local.organization_branding[each.key].primary_color
+      page_background = local.organization_branding[each.key].page_background_color
     }
   }
 }

@@ -53,7 +53,16 @@ terraform plan -var-file=customers/acme.tfvars -out=acme.tfplan
 terraform apply acme.tfplan
 ```
 
-Outputs:
+Configuration of the demo app (organizations, roles, applications, test accounts, Auth0 client, Admin UI and DAE links; no secret), from the repository root:
+
+```bash
+npm run config    # terraform output -json demo_config > src/config/demo.json (git-ignored)
+npm run dev
+```
+
+Without `src/config/demo.json`, the app falls back to a neutral configuration and the `VITE_AUTH0_*` variables of `.env`, which also override the generated values when set.
+
+Other outputs:
 
 ```bash
 terraform output spa_env                    # .env of the demo SPA

@@ -13,8 +13,8 @@ web_app_urls = ["http://localhost:3000"]
 
 admin_ui_url = "https://admin-ui-demo.lyvoc.com"
 
-# MFA is shown on demand in the demo, not required at every login
-require_mfa = false
+# MFA is shown on demand (demo step), not required at every login
+mfa = "step-up"
 
 organizations = {
   acme-france = {
@@ -30,16 +30,19 @@ organizations = {
 # Emails: test_users_email_template (<alias>@example.com by default)
 test_users = {
   acme-admin = {
+    description  = "Organization admin, full access"
     name         = "Acme Admin"
     memberships  = { acme-france = ["admin"] }
     app_metadata = { dae_role = "Delegated Admin - Administrator", business_role = "admin" }
   }
   acme-customer = {
+    description  = "B2B customer persona"
     name         = "Acme Customer"
     memberships  = { acme-france = ["b2b_customer"] }
     app_metadata = { business_role = "b2b_customer" }
   }
   acme-multi = {
+    description  = "Member of two organizations"
     name         = "Acme Multi-organization Buyer"
     memberships  = { acme-france = ["buyer"], acme-spain = ["buyer"] }
     app_metadata = { business_role = "buyer" }

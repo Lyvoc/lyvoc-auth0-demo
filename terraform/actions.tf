@@ -41,7 +41,7 @@ resource "auth0_trigger_action" "claims" {
 }
 
 resource "auth0_action" "mfa" {
-  count = var.require_mfa ? 1 : 0
+  count = var.mfa != "off" ? 1 : 0
 
   name    = "${var.customer.name} - Demo MFA"
   runtime = "node22"
@@ -62,10 +62,15 @@ resource "auth0_action" "mfa" {
     name  = "DATABASE_CONNECTION"
     value = auth0_connection.users.name
   }
+
+  secrets {
+    name  = "MFA_MODE"
+    value = var.mfa
+  }
 }
 
 resource "auth0_trigger_action" "mfa" {
-  count = var.require_mfa ? 1 : 0
+  count = var.mfa != "off" ? 1 : 0
 
   trigger      = "post-login"
   action_id    = auth0_action.mfa[0].id

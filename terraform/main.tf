@@ -9,6 +9,23 @@ locals {
   auth0_domain     = var.custom_domain != "" ? var.custom_domain : data.auth0_tenant.current.domain
   managed_by       = "Managed by Terraform (lyvoc-auth0-demo, ${local.slug})"
 
+  # Organization branding, falling back to the customer's
+  organization_branding = {
+    for name, org in var.organizations : name => {
+      logo_url              = coalesce(org.logo_url, var.customer.logo_url, "https://cdn.auth0.com/styleguide/components/1.0.8/media/logos/img/badge.png")
+      primary_color         = coalesce(org.primary_color, var.customer.primary_color)
+      page_background_color = coalesce(org.page_background_color, var.customer.page_background_color)
+    }
+  }
+
+  # <tenant>.<region>.auth0.com -> https://<tenant>.<region>.webtask.run/auth0-delegated-admin
+  tenant_parts = split(".", data.auth0_tenant.current.domain)
+  dae_url = var.dae_url != "" ? var.dae_url : format(
+    "https://%s.%s.webtask.run/auth0-delegated-admin",
+    local.tenant_parts[0],
+    length(local.tenant_parts) == 4 ? local.tenant_parts[1] : "us"
+  )
+
   # Application login URI: the first https origin (Auth0 rejects http ones)
   https_spa_urls = [for url in var.spa_urls : url if startswith(url, "https://")]
   https_web_urls = [for url in var.web_app_urls : url if startswith(url, "https://")]

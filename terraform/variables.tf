@@ -101,10 +101,52 @@ variable "organizations" {
   }
 }
 
+variable "applications" {
+  description = "Applications of the customer portal shown in the demo app (tiles, key = ID), with the roles giving access to them."
+  type = map(object({
+    name        = string
+    description = string
+    icon        = string
+    roles       = list(string)
+  }))
+  default = {
+    orders = {
+      name        = "Orders"
+      description = "Order management"
+      icon        = "🛒"
+      roles       = ["buyer", "admin"]
+    }
+    documents = {
+      name        = "Documents"
+      description = "Product documentation and marketing material"
+      icon        = "📚"
+      roles       = ["b2b_customer", "admin"]
+    }
+    training = {
+      name        = "Training"
+      description = "Courses and certifications"
+      icon        = "🎓"
+      roles       = ["b2b_customer", "admin"]
+    }
+    support = {
+      name        = "Support"
+      description = "Tickets and field service"
+      icon        = "🛠️"
+      roles       = ["admin"]
+    }
+  }
+
+  validation {
+    condition     = alltrue(flatten([for app in values(var.applications) : [for role in app.roles : contains(keys(var.roles), role)]]))
+    error_message = "applications: roles must be declared in roles."
+  }
+}
+
 variable "test_users" {
   description = "Test accounts (key = alias, see test_users_email_template) with their organization memberships (organization name => roles)."
   type = map(object({
     name         = string
+    description  = optional(string, "")
     memberships  = optional(map(list(string)), {})
     app_metadata = optional(map(string), {})
   }))
@@ -140,10 +182,15 @@ variable "allow_public_signup" {
   default     = true
 }
 
-variable "require_mfa" {
-  description = "Require MFA for database users of the demo applications (post-login Action). The tenant must have at least one MFA factor enabled."
-  type        = bool
-  default     = true
+variable "mfa" {
+  description = "MFA of the demo database users (post-login Action): \"step-up\" only when the demo app asks for it (acr_values), \"always\" at every login, \"off\". The tenant must have at least one MFA factor enabled."
+  type        = string
+  default     = "step-up"
+
+  validation {
+    condition     = contains(["step-up", "always", "off"], var.mfa)
+    error_message = "mfa: \"step-up\", \"always\" or \"off\"."
+  }
 }
 
 variable "enable_passwordless_email" {
@@ -156,6 +203,12 @@ variable "enable_dae" {
   description = "Create the Management API application used by the Delegated Administration extension hooks (the extension itself and its roles are tenant-wide, installed manually)."
   type        = bool
   default     = true
+}
+
+variable "dae_url" {
+  description = "URL of the Delegated Administration extension. Defaults to https://<tenant>.<region>.webtask.run/auth0-delegated-admin."
+  type        = string
+  default     = ""
 }
 
 variable "custom_domain" {
