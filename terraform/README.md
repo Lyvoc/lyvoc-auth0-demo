@@ -11,7 +11,7 @@ Creates, on a shared Auth0 demo tenant, everything one customer's demo needs, br
 | Passwordless | `email` (existing) | One per tenant: looked up, enabled on the apps only (a passwordless login is a separate user, not an organization member) |
 | Organizations | from `organizations` | Logo and colors per organization (login page branding) |
 | Roles | `<app_name>:<role>` | Admin UI naming convention, with their API permissions |
-| Test users | from `test_users` | Organization members with their roles, one generated password |
+| Test users | from `test_users` | Organization members with their roles, one shared password, `app_metadata` role cache read by the Admin UI (reset at every apply) |
 | Actions (post-login) | `<Customer> - Demo claims`, `<Customer> - Demo MFA` | Only run for the demo apps |
 | DAE hooks M2M | `<Customer> - DAE hooks` | Management API access for the Delegated Administration hooks |
 

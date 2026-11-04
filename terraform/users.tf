@@ -12,6 +12,23 @@ resource "random_password" "test_users" {
 
 locals {
   test_users_password = var.test_users_password != "" ? var.test_users_password : random_password.test_users.result
+
+  # Cache of the role assignments read by the Admin UI (application members,
+  # Applications column) and the applications, in the format its
+  # syncUserRoleMetadata() builds: roles[app][organization] = [{ name, permission }]
+  test_users_role_metadata = {
+    for alias, user in var.test_users : alias => {
+      roles = {
+        for app in [local.app_name] : app => {
+          for org, roles in user.memberships : org => [
+            for role in roles : { name = "${local.role_prefix}${role}", permission = var.roles[role].description }
+          ] if length(roles) > 0
+        } if anytrue([for roles in values(user.memberships) : length(roles) > 0])
+      }
+      apps          = anytrue([for roles in values(user.memberships) : length(roles) > 0]) ? [local.app_name] : []
+      organizations = keys(user.memberships)
+    }
+  }
 }
 
 # The Management API only creates users in a database enabled for the caller
@@ -32,12 +49,11 @@ resource "auth0_user" "test" {
   # Reset to the shared password at every apply, even if changed during a demo
   password = local.test_users_password
 
-  # organizations: names, read by the DAE hooks
-  app_metadata = jsonencode(merge(each.value.app_metadata, { organizations = keys(each.value.memberships) }))
+  # Reset at every apply with the memberships, like the password
+  app_metadata = jsonencode(merge(each.value.app_metadata, local.test_users_role_metadata[each.key]))
 
-  # Edited afterwards by the demo itself (Admin UI, DAE)
   lifecycle {
-    ignore_changes = [app_metadata, user_metadata]
+    ignore_changes = [user_metadata]
   }
 }
 
