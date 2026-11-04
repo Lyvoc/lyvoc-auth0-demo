@@ -34,3 +34,13 @@ Thumbs.db
 # Temporary files
 *.tmp
 .cache/
+
+# Terraform (the lock file is committed)
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfstate.d/
+*.tfplan
+crash.log
+# Terraform M2M credentials (see terraform/README.md)
+terraform/.env*
