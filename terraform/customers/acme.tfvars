@@ -13,6 +13,9 @@ web_app_urls = ["http://localhost:3000"]
 
 admin_ui_url = "https://admin-ui-demo.lyvoc.com"
 
+# MFA is shown on demand in the demo, not required at every login
+require_mfa = false
+
 organizations = {
   acme-france = {
     display_name  = "Acme France"
