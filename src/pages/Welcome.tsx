@@ -157,8 +157,8 @@ const Welcome = () => {
         <div style={{ textAlign: "left" }}>
           <h2 style={{ color: "#48bb78", marginBottom: 12 }}>Demo Test Plan</h2>
           <p style={{ color: "#a0aec0", marginBottom: 20 }}>
-            Run the steps in order. All test accounts share one password, given by the presenter
-            (<code style={monoStyle}>terraform output -raw test_users_password</code>).
+            Run the steps in order. All test accounts share one password:{" "}
+            <code style={monoStyle}>{demoConfig.testUsersPassword || "given by the presenter"}</code>
           </p>
           <ol style={{ paddingLeft: 20, margin: 0 }}>
             {testPlan.map((step) => (

@@ -1,6 +1,7 @@
 # Values for the demo app and the DAE hooks
 
-# Configuration of the demo app (no secret):
+# Configuration of the demo app (no secret but the test accounts' password,
+# shown on the demo site):
 #   terraform output -json demo_config > ../src/config/demo.json
 # (npm run config, at the repository root)
 output "demo_config" {
@@ -53,9 +54,10 @@ output "demo_config" {
         daeRole     = lookup(user.app_metadata, "dae_role", "")
       }
     ]
-    webAppUrls = var.web_app_urls
-    adminUiUrl = var.admin_ui_url
-    daeUrl     = var.enable_dae ? local.dae_url : ""
+    testUsersPassword = nonsensitive(local.test_users_password)
+    webAppUrls        = var.web_app_urls
+    adminUiUrl        = var.admin_ui_url
+    daeUrl            = var.enable_dae ? local.dae_url : ""
     features = {
       passwordless = var.enable_passwordless_email
       dae          = var.enable_dae

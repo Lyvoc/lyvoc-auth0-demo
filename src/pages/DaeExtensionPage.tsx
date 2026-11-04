@@ -168,7 +168,7 @@ const DaeExtensionPage: React.FC = () => (
         {user.description && <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{user.description}</p>}
         <div style={credentialStyle}>
           <span style={{ color: '#a78bfa' }}>Username:</span> {user.email}<br />
-          <span style={{ color: '#a78bfa' }}>Password:</span> given by the presenter<br />
+          <span style={{ color: '#a78bfa' }}>Password:</span> {demoConfig.testUsersPassword || 'given by the presenter'}<br />
           <span style={{ color: '#a78bfa' }}>Org:</span> {user.memberships.map((m) => m.organization).join(', ') || '—'} · Role: {user.daeRole}
         </div>
       </div>

@@ -384,7 +384,8 @@ const OrganizationPage: React.FC = () => {
         <div style={sectionStyle}>
           <h2 style={{ marginTop: 0 }}>👤 Test Accounts</h2>
           <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>
-            Each account demonstrates a specific persona or access pattern. They share one password, given by the presenter.
+            Each account demonstrates a specific persona or access pattern. They share one password:{" "}
+            <code>{demoConfig.testUsersPassword || "given by the presenter"}</code>
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1rem" }}>

@@ -33,7 +33,7 @@ The tenant is shared with other demos and with the Admin UI:
   export TF_VAR_terraform_client_id="$AUTH0_CLIENT_ID"
   # Mailbox receiving the test accounts' emails (passwordless and MFA codes), %s = account alias
   export TF_VAR_test_users_email_template="firstname.lastname+%s@lyvoc.com"
-  # Password of all the test accounts (generated when not set)
+  # Password of all the test accounts (generated when not set), shown on the demo site
   export TF_VAR_test_users_password="<password>"
   ```
 
@@ -55,7 +55,7 @@ terraform plan -var-file=customers/acme.tfvars -out=acme.tfplan
 terraform apply acme.tfplan
 ```
 
-Configuration of the demo app (organizations, roles, applications, test accounts, Auth0 client, Admin UI and DAE links; no secret), from the repository root:
+Configuration of the demo app (organizations, roles, applications, test accounts and their password, Auth0 client, Admin UI and DAE links; no other secret), from the repository root:
 
 ```bash
 npm run config    # terraform output -json demo_config > src/config/demo.json (git-ignored)

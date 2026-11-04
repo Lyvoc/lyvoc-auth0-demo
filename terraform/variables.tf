@@ -166,7 +166,7 @@ variable "test_users" {
 }
 
 variable "test_users_password" {
-  description = "Password of all the test accounts (TF_VAR_test_users_password, in the git-ignored credentials file). Empty: a generated one (terraform output -raw test_users_password). Every apply resets the accounts to it."
+  description = "Password of all the test accounts (TF_VAR_test_users_password, in the git-ignored credentials file). Empty: a generated one (terraform output -raw test_users_password). Every apply resets the accounts to it. Shown on the demo site (demo_config)."
   type        = string
   default     = ""
   sensitive   = true

@@ -46,6 +46,7 @@ export interface DemoConfig {
   roles: { name: string; description: string }[];
   applications: DemoApplication[];
   testUsers: DemoTestUser[];
+  testUsersPassword: string;
   webAppUrls: string[];
   adminUiUrl: string;
   daeUrl: string;
@@ -78,6 +79,7 @@ const DEFAULT_CONFIG: DemoConfig = {
   roles: [],
   applications: [],
   testUsers: [],
+  testUsersPassword: "",
   webAppUrls: [],
   adminUiUrl: "",
   daeUrl: "",
