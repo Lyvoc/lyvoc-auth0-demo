@@ -69,8 +69,8 @@ const useTestPlan = (): TestStep[] => {
   if (features.passwordless && connections.passwordless) {
     steps.push({
       title: "Passwordless login (code by email)",
-      where: "Universal Login, passwordless email connection",
-      note: "Use a mailbox you can read: the code is sent by email.",
+      where: "Universal Login, passwordless email connection, without organization",
+      note: "Use a mailbox you can read: the code is sent by email. Not offered in the organizations: a code login is a separate user, not a member.",
       action: {
         label: "Log In with a code",
         run: () => loginWithRedirect({ authorizationParams: { connection: connections.passwordless!, redirect_uri: redirectUri } }),

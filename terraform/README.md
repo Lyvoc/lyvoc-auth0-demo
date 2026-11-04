@@ -8,7 +8,7 @@ Creates, on a shared Auth0 demo tenant, everything one customer's demo needs, br
 | Regular web app | `<app_name> Web` | SSO between two applications. Callbacks `<origin>/callback` |
 | API | `<Customer> - Demo API` | Scopes `read:data` / `write:data`, RBAC (permissions in the access token) |
 | Database | `<slug>-users` | Username/password, enabled on both apps and every organization |
-| Passwordless | `email` (existing) | One per tenant: looked up, enabled on the apps and organizations |
+| Passwordless | `email` (existing) | One per tenant: looked up, enabled on the apps only (a passwordless login is a separate user, not an organization member) |
 | Organizations | from `organizations` | Logo and colors per organization (login page branding) |
 | Roles | `<app_name>:<role>` | Admin UI naming convention, with their API permissions |
 | Test users | from `test_users` | Organization members with their roles, one generated password |

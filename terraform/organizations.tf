@@ -18,11 +18,13 @@ resource "auth0_organization" "this" {
 }
 
 # Connections available in each organization (members only: no
-# auto-membership, sign-up through invitations)
+# auto-membership, sign-up through invitations). The demo database only:
+# passwordless logins create a separate user, never a member of the
+# organization, so it is kept for logins without organization
 resource "auth0_organization_connection" "this" {
   for_each = {
-    for pair in setproduct(keys(var.organizations), keys(local.connection_ids)) :
-    "${pair[0]}/${pair[1]}" => { org = pair[0], connection_id = local.connection_ids[pair[1]] }
+    for org in keys(var.organizations) :
+    "${org}/users" => { org = org, connection_id = auth0_connection.users.id }
   }
 
   organization_id            = auth0_organization.this[each.value.org].id

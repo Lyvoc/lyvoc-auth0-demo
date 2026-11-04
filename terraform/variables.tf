@@ -201,7 +201,7 @@ variable "mfa" {
 }
 
 variable "enable_passwordless_email" {
-  description = "Enable the tenant's passwordless \"email\" connection (one per tenant, not managed here) on the demo applications and organizations."
+  description = "Enable the tenant's passwordless \"email\" connection (one per tenant, not managed here) on the demo applications (not on the organizations: a passwordless login is a separate user, not a member)."
   type        = bool
   default     = true
 }
