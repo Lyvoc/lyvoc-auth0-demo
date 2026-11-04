@@ -124,7 +124,7 @@ output "test_users" {
 }
 
 output "test_users_password" {
-  value     = random_password.test_users.result
+  value     = local.test_users_password
   sensitive = true
 }
 

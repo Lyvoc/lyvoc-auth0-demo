@@ -165,6 +165,13 @@ variable "test_users" {
   }
 }
 
+variable "test_users_password" {
+  description = "Password of all the test accounts (TF_VAR_test_users_password, in the git-ignored credentials file). Empty: a generated one (terraform output -raw test_users_password). Every apply resets the accounts to it."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "test_users_email_template" {
   description = "Email of the test accounts, %s being the alias: a mailbox of the person running the demo, to receive the passwordless and MFA codes (e.g. \"firstname.lastname+%s@lyvoc.com\", set in the git-ignored credentials file). Empty: <alias>@example.com, which receives nothing."
   type        = string

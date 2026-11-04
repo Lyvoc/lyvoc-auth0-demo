@@ -1,5 +1,5 @@
-# Test accounts, all with the same generated password
-# (terraform output -raw test_users_password)
+# Test accounts, all with the same password: test_users_password, or a
+# generated one (terraform output -raw test_users_password)
 resource "random_password" "test_users" {
   length           = 20
   special          = true
@@ -8,6 +8,10 @@ resource "random_password" "test_users" {
   min_upper        = 2
   min_numeric      = 2
   min_special      = 2
+}
+
+locals {
+  test_users_password = var.test_users_password != "" ? var.test_users_password : random_password.test_users.result
 }
 
 # The Management API only creates users in a database enabled for the caller
@@ -25,14 +29,15 @@ resource "auth0_user" "test" {
   email           = local.test_user_emails[each.key]
   name            = each.value.name
   email_verified  = true
-  password        = random_password.test_users.result
+  # Reset to the shared password at every apply, even if changed during a demo
+  password = local.test_users_password
 
   # organizations: names, read by the DAE hooks
   app_metadata = jsonencode(merge(each.value.app_metadata, { organizations = keys(each.value.memberships) }))
 
-  # Edited afterwards by the demo itself (Admin UI, DAE, password reset)
+  # Edited afterwards by the demo itself (Admin UI, DAE)
   lifecycle {
-    ignore_changes = [app_metadata, user_metadata, password]
+    ignore_changes = [app_metadata, user_metadata]
   }
 }
 

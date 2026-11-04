@@ -33,6 +33,8 @@ The tenant is shared with other demos and with the Admin UI:
   export TF_VAR_terraform_client_id="$AUTH0_CLIENT_ID"
   # Mailbox receiving the test accounts' emails (passwordless and MFA codes), %s = account alias
   export TF_VAR_test_users_email_template="firstname.lastname+%s@lyvoc.com"
+  # Password of all the test accounts (generated when not set)
+  export TF_VAR_test_users_password="<password>"
   ```
 
   The demo database is enabled for this application: the Management API only creates users in a database enabled for the caller.
