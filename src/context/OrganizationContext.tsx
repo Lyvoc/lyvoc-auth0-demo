@@ -7,6 +7,7 @@ import {
   ApplicationAccess,
   getOrgId,
 } from "../config/organizationBranding";
+import { claimName } from "../config/demo";
 
 /**
  * Organization claims from Auth0 ID token
@@ -122,8 +123,8 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
       roles.push(...claims.permissions);
     }
 
-    // Organization roles (custom namespace)
-    const orgRolesClaim = claims["https://fluidra.com/org_roles"] || 
+    // Organization roles (custom namespace, set by the "Demo claims" Action)
+    const orgRolesClaim = claims[claimName("org_roles")] ||
                           claims["org_roles"] ||
                           claims["roles"];
     if (Array.isArray(orgRolesClaim)) {
@@ -131,7 +132,7 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
 
     // App metadata roles
-    const appMetadata = claims["https://fluidra.com/app_metadata"] || claims["app_metadata"];
+    const appMetadata = claims[claimName("app_metadata")] || claims["app_metadata"];
     if (appMetadata && typeof appMetadata === "object" && "roles" in appMetadata) {
       const metaRoles = (appMetadata as { roles?: string[] }).roles;
       if (Array.isArray(metaRoles)) {
@@ -165,8 +166,8 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
       }
 
       // If user object has org memberships, populate them
-      if (user && (user as Record<string, unknown>)["https://fluidra.com/organizations"]) {
-        const orgs = (user as Record<string, unknown>)["https://fluidra.com/organizations"] as string[];
+      if (user && (user as Record<string, unknown>)[claimName("organizations")]) {
+        const orgs = (user as Record<string, unknown>)[claimName("organizations")] as string[];
         const orgList: UserOrganization[] = orgs.map((orgName) => {
           const branding = getOrganizationBranding(orgName);
           return {

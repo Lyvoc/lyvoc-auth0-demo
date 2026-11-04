@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { OrganizationBranding, getOrganizationBranding } from "../config/organizationBranding";
+import { demoConfig } from "../config/demo";
 
-// Default theme values (matches :root in index.css)
+// Default theme values: the customer of the demo configuration, then :root in index.css
 const DEFAULT_THEME = {
-  customerName: "Fluidra",
-  logoUrl: "https://www.fluidra.com/wp-content/uploads/2024/07/Logo.webp",
-  primaryColor: "#63b3ed",
-  secondaryColor: "#ed8936",
+  customerName: demoConfig.customer.name,
+  logoUrl: demoConfig.customer.logoUrl,
+  primaryColor: demoConfig.customer.primaryColor,
+  secondaryColor: demoConfig.customer.secondaryColor,
   bgPrimary: "#1a1e27",
   bgSecondary: "#262a33",
   bgSidebar: "#23263a",
@@ -32,8 +33,8 @@ const STORAGE_KEY = "auth0-cic-demo-theme";
 
 // Get env var values as fallback
 const getEnvTheme = (): Partial<ThemeConfig> => ({
-  customerName: import.meta.env.VITE_CUSTOMER_NAME || "Fluidra",
-  logoUrl: import.meta.env.VITE_LOGO_URL || "https://www.fluidra.com/wp-content/uploads/2024/07/Logo.webp",
+  customerName: import.meta.env.VITE_CUSTOMER_NAME || "",
+  logoUrl: import.meta.env.VITE_LOGO_URL || "",
   primaryColor: import.meta.env.VITE_PRIMARY_COLOR || "",
   secondaryColor: import.meta.env.VITE_SECONDARY_COLOR || "",
   bgPrimary: import.meta.env.VITE_BG_PRIMARY || "",
@@ -83,8 +84,8 @@ const applyTheme = (theme: ThemeConfig) => {
   root.style.setProperty("--text-secondary", theme.textSecondary);
   root.style.setProperty("--text-muted", theme.textMuted);
   
-  // Update document title (always fallback to Fluidra)
-  const customerName = theme.customerName && theme.customerName.trim() ? theme.customerName : "Fluidra";
+  // Update document title (fallback to the configured customer)
+  const customerName = theme.customerName && theme.customerName.trim() ? theme.customerName : demoConfig.customer.name;
   document.title = `${customerName} CIC Demo`;
 };
 

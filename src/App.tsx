@@ -46,7 +46,7 @@ const AppContent = () => {
       return;
     }
 
-    // Handle URL-based organization routing (e.g., ?org=fluidra-es or ?org=org_xxx)
+    // Handle URL-based organization routing (e.g., ?org=<organization name> or ?org=org_xxx)
     if (orgParam && !isAuthenticated) {
       // Convert org name to org ID if needed
       const orgId = getOrgId(orgParam);

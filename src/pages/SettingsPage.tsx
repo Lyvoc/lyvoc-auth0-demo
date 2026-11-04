@@ -283,7 +283,7 @@ const SettingsPage: React.FC = () => {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ color: formValues.textPrimary, fontWeight: 600, marginBottom: 4 }}>
-              {formValues.customerName && formValues.customerName.trim() ? formValues.customerName : "Fluidra"} CIC Demo
+              {formValues.customerName && formValues.customerName.trim() ? formValues.customerName : DEFAULT_THEME.customerName} CIC Demo
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <span style={{ color: formValues.primaryColor, fontWeight: 500 }}>Active Link</span>

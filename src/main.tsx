@@ -6,18 +6,19 @@ import App from "./App";
 import "./index.css";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
+import { demoConfig } from "./config/demo";
 
-const domain = import.meta.env.VITE_AUTH0_DOMAIN;
-const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
-const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
+// Environment variables override the demo configuration (src/config/demo.json)
+const domain = import.meta.env.VITE_AUTH0_DOMAIN || demoConfig.auth0.domain;
+const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID || demoConfig.auth0.clientId;
+const audience = import.meta.env.VITE_AUTH0_AUDIENCE || demoConfig.auth0.audience;
 
 // Validate Auth0 configuration
 if (!domain || !clientId) {
-  console.error("Auth0 configuration missing. Please check your .env file.");
-  console.error("Required environment variables:");
+  console.error("Auth0 configuration missing: generate src/config/demo.json (npm run config) or set in .env:");
   console.error("- VITE_AUTH0_DOMAIN");
   console.error("- VITE_AUTH0_CLIENT_ID");
-  throw new Error("Auth0 domain and client ID must be set in .env file");
+  throw new Error("Auth0 domain and client ID must be set (src/config/demo.json or .env)");
 }
 
 // Validate domain format (custom domains like demo-auth0.lyvoc.com are also valid)

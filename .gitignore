@@ -44,3 +44,6 @@ terraform.tfstate.d/
 crash.log
 # Terraform M2M credentials (see terraform/README.md)
 terraform/.env*
+
+# Demo configuration generated from Terraform (npm run config)
+src/config/demo.json

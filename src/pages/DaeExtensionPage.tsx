@@ -1,4 +1,5 @@
 import React from 'react';
+import { demoConfig } from '../config/demo';
 
 const sectionStyle: React.CSSProperties = {
   background: '#2d313c',
@@ -36,11 +37,16 @@ const dividerStyle: React.CSSProperties = {
   margin: '0.85rem 0',
 };
 
+const { customer, testUsers, daeUrl } = demoConfig;
+const daeAdmins = testUsers.filter((user) => user.daeRole);
+const daeAdmin = daeAdmins[0];
+const otherUser = testUsers.find((user) => !user.daeRole);
+
 const DaeExtensionPage: React.FC = () => (
   <div style={{ padding: '2rem', maxWidth: '900px' }}>
     <h1>Delegated Administration Extension (DAE)</h1>
     <p style={{ color: 'var(--text-secondary)' }}>
-      The <strong>DAE</strong> allows a Fluidra admin to manage users across all organizations — creating accounts,
+      The <strong>DAE</strong> allows a {customer.name} admin to manage users across organizations — creating accounts,
       updating profiles, and setting custom attributes — without requiring full Auth0 Dashboard access.
     </p>
 
@@ -53,14 +59,16 @@ const DaeExtensionPage: React.FC = () => (
       >
         Auth0 Documentation
       </a>
-      <a
-        href="https://demo-lyvoc.eu.webtask.run/auth0-delegated-admin"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ ...buttonStyle, background: '#005BAC', color: '#fff' }}
-      >
-        Open DAE App
-      </a>
+      {daeUrl && (
+        <a
+          href={daeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ ...buttonStyle, background: 'var(--primary-color)', color: '#fff' }}
+        >
+          Open DAE App
+        </a>
+      )}
     </div>
 
     <h2>Use Cases</h2>
@@ -69,15 +77,17 @@ const DaeExtensionPage: React.FC = () => (
     <div style={sectionStyle}>
       <h3 style={{ marginTop: 0 }}>Create a User via Invitation</h3>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-        Log in to the DAE as a Fluidra admin. Create a new user — the write hook automatically sends them an
+        Log in to the DAE as a {customer.name} admin. Create a new user — the write hook automatically sends them an
         organization invitation email instead of setting a password directly. The user clicks the link in the
-        email to set their own password and join the org.
+        email to set their own password and join the organization.
       </p>
-      <div style={credentialStyle}>
-        <span style={{ color: '#a78bfa' }}>Log in as:</span> admin@fluidra.com / Password123!
-      </div>
+      {daeAdmin && (
+        <div style={credentialStyle}>
+          <span style={{ color: '#a78bfa' }}>Log in as:</span> {daeAdmin.email}
+        </div>
+      )}
       <p style={{ marginTop: '0.75rem', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-        In the DAE: click <strong>Create User</strong> → fill in email, connection, select <strong>Business Role</strong> (e.g. Grepool Buyer) → click <strong>Create</strong>.<br />
+        In the DAE: click <strong>Create User</strong> → fill in email, connection, select a <strong>Business Role</strong> → click <strong>Create</strong>.<br />
         The new user receives an invitation email → clicks the link → sets their password → joins the organization.
       </p>
     </div>
@@ -88,33 +98,15 @@ const DaeExtensionPage: React.FC = () => (
     <div style={sectionStyle}>
       <h3 style={{ marginTop: 0 }}>Set Custom Attributes</h3>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-        Log in as the Fluidra admin and set <code>user_metadata</code> on a user from a <strong>different organization</strong> —
-        demonstrating that a cross-org admin can manage any user regardless of their org.
+        Log in as the {customer.name} admin and set <code>user_metadata</code> on another user, demonstrating that the
+        admin manages users without Auth0 Dashboard access.
       </p>
       <div style={credentialStyle}>
-        <span style={{ color: '#a78bfa' }}>Log in as:</span> admin@fluidra.com / Password123!<br />
-        <span style={{ color: '#a78bfa' }}>Target user:</span> buyer@grepool.com (grepool-es)
+        {daeAdmin && <><span style={{ color: '#a78bfa' }}>Log in as:</span> {daeAdmin.email}<br /></>}
+        {otherUser && <><span style={{ color: '#a78bfa' }}>Target user:</span> {otherUser.email}</>}
       </div>
       <p style={{ marginTop: '0.75rem', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-        Click on <strong>buyer@grepool.com</strong> → click <strong>Change Profile</strong> → fill in <strong>Tier</strong>, <strong>Region</strong>, or <strong>Preferred Language</strong> → click <strong>Update</strong>.
-      </p>
-    </div>
-
-    <hr style={dividerStyle} />
-
-    {/* Scoped Access */}
-    <div style={sectionStyle}>
-      <h3 style={{ marginTop: 0 }}>Scoped Admin Access</h3>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-        Log in as the Grepool admin to show that a scoped admin can only see and manage users within their own organization —
-        contrasting with the Fluidra admin who sees everyone.
-      </p>
-      <div style={credentialStyle}>
-        <span style={{ color: '#a78bfa' }}>Log in as:</span> admin@grepool.com / Password123!<br />
-        <span style={{ color: '#a78bfa' }}>Observe:</span> only grepool-es users are visible in the list
-      </div>
-      <p style={{ marginTop: '0.75rem', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-        Open the DAE and compare the user list with what <strong>admin@fluidra.com</strong> sees. The filter hook restricts visibility based on the admin's organization.
+        Click on the target user → click <strong>Change Profile</strong> → fill in the custom fields → click <strong>Update</strong>.
       </p>
     </div>
 
@@ -129,17 +121,16 @@ const DaeExtensionPage: React.FC = () => (
     <div style={sectionStyle}>
       <h3 style={{ marginTop: 0 }}>Filter Hook</h3>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-        Runs when the admin opens the user list. Returns a Lucene query that limits which users are visible.
-        A Fluidra admin sees users from both <code>fluidra-es</code> and <code>grepool-es</code>.
+        Runs when the admin opens the user list. Returns a Lucene query that limits which users are visible,
+        based on the organizations of the admin (<code>app_metadata.organizations</code>).
       </p>
     </div>
 
     <div style={sectionStyle}>
       <h3 style={{ marginTop: 0 }}>Settings Query</h3>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-        Runs when the Create or Edit user form loads. Defines what custom fields appear — in this case
-        a <strong>DAE Role</strong> dropdown, a <strong>Business Role</strong> dropdown, and custom <code>user_metadata</code> fields
-        (<strong>Tier</strong>, <strong>Region</strong>, <strong>Preferred Language</strong>).
+        Runs when the Create or Edit user form loads. Defines what custom fields appear — a <strong>DAE Role</strong>{' '}
+        dropdown, a <strong>Business Role</strong> dropdown, and custom <code>user_metadata</code> fields.
         The role options shown depend on which organization the logged-in admin belongs to.
       </p>
     </div>
@@ -147,10 +138,10 @@ const DaeExtensionPage: React.FC = () => (
     <div style={sectionStyle}>
       <h3 style={{ marginTop: 0 }}>Write Hook</h3>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-        Runs when a user is created or updated. Maps the selected Business Role to an organization
-        (e.g. <code>b2b_customer</code> → <code>fluidra-es</code>) and sets <code>app_metadata.organizations</code>
-        on the user. On <strong>create</strong>, it sends an org invitation email via the Management API instead of
-        setting a password directly. On <strong>update</strong>, it syncs Auth0 RBAC roles via the Management API.
+        Runs when a user is created or updated. Maps the selected Business Role to an organization and sets{' '}
+        <code>app_metadata.organizations</code> on the user. On <strong>create</strong>, it sends an organization
+        invitation email via the Management API instead of setting a password directly. On <strong>update</strong>,
+        it syncs Auth0 RBAC roles via the Management API.
       </p>
       <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
         <strong>Flow when creating a user:</strong>
@@ -167,32 +158,21 @@ const DaeExtensionPage: React.FC = () => (
     <hr style={dividerStyle} />
 
     {/* Test Accounts */}
-    <h2 style={{ marginTop: '1.5rem' }}>Test Accounts</h2>
-
-    <div style={sectionStyle}>
-      <h3 style={{ marginTop: 0 }}>Fluidra Admin</h3>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-        Full DAE access — can create and manage users across all Fluidra organizations.
-      </p>
-      <div style={credentialStyle}>
-        <span style={{ color: '#a78bfa' }}>Username:</span> admin@fluidra.com<br />
-        <span style={{ color: '#a78bfa' }}>Password:</span> Password123!<br />
-        <span style={{ color: '#a78bfa' }}>Org:</span> fluidra-es · Role: admin
+    <h2 style={{ marginTop: '1.5rem' }}>DAE Administrators</h2>
+    {daeAdmins.length === 0 && (
+      <p style={{ color: 'var(--text-secondary)' }}>No test account with a DAE role in the demo configuration.</p>
+    )}
+    {daeAdmins.map((user) => (
+      <div key={user.email} style={sectionStyle}>
+        <h3 style={{ marginTop: 0 }}>{user.name}</h3>
+        {user.description && <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{user.description}</p>}
+        <div style={credentialStyle}>
+          <span style={{ color: '#a78bfa' }}>Username:</span> {user.email}<br />
+          <span style={{ color: '#a78bfa' }}>Password:</span> given by the presenter<br />
+          <span style={{ color: '#a78bfa' }}>Org:</span> {user.memberships.map((m) => m.organization).join(', ') || '—'} · Role: {user.daeRole}
+        </div>
       </div>
-    </div>
-
-    <div style={sectionStyle}>
-      <h3 style={{ marginTop: 0 }}>Grepool Admin</h3>
-      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-        Scoped DAE admin — can only see and manage users within <code>grepool-es</code>.
-        Use this to contrast with the Fluidra admin and show how the filter hook scopes access per organization.
-      </p>
-      <div style={credentialStyle}>
-        <span style={{ color: '#a78bfa' }}>Username:</span> admin@grepool.com<br />
-        <span style={{ color: '#a78bfa' }}>Password:</span> Password123!<br />
-        <span style={{ color: '#a78bfa' }}>Org:</span> grepool-es · Role: Delegated Admin - Administrator
-      </div>
-    </div>
+    ))}
   </div>
 );
 

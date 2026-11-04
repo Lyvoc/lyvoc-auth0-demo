@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { getAvailableBrands, ORGANIZATION_BRANDING, getOrgId } from "../config/organizationBranding";
+import { demoConfig } from "../config/demo";
 
 interface OrganizationPickerProps {
   /** Show as full-page picker vs inline component */
@@ -32,7 +33,7 @@ const OrganizationPicker: React.FC<OrganizationPickerProps> = ({
     } else {
       // Direct login to first/only country using org ID
       const country = brand.countries[0];
-      handleOrgLogin(country?.orgName || `${brandId}-es`, country?.orgId);
+      handleOrgLogin(country?.orgName || brandId, country?.orgId);
     }
   };
 
@@ -161,10 +162,10 @@ const OrganizationPicker: React.FC<OrganizationPickerProps> = ({
       {fullPage && (
         <div style={headerStyle}>
           <h1 style={{ fontSize: "1.75rem", marginBottom: "0.5rem", color: "var(--text-primary)" }}>
-            Welcome to PRO AREA
+            Welcome to the {demoConfig.customer.name} portal
           </h1>
           <p style={{ color: "var(--text-muted)", fontSize: "1rem" }}>
-            Select your brand to continue
+            Select your organization to continue
           </p>
         </div>
       )}
@@ -188,9 +189,11 @@ const OrganizationPicker: React.FC<OrganizationPickerProps> = ({
                 }}
               />
               <div style={brandNameStyle}>{brand.name}</div>
-              <div style={countryBadgeStyle(brand.primaryColor)}>
-                {brand.countries.length} {brand.countries.length === 1 ? "country" : "countries"}
-              </div>
+              {brand.countries.length > 1 && (
+                <div style={countryBadgeStyle(brand.primaryColor)}>
+                  {brand.countries.length} countries
+                </div>
+              )}
             </div>
           ))}
         </div>
