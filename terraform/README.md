@@ -54,7 +54,7 @@ On an organization login Auth0 only puts the organization's roles in the token: 
   export TF_VAR_test_users_password="<password>"
   ```
 
-  The demo database is enabled for this application: the Management API only creates users in a connection enabled for the caller. The passwordless `email` connection is shared by every customer, so it is enabled for this application once, by hand (Dashboard > Authentication > Passwordless > Email > Applications).
+  The demo database is enabled for this application: the Management API only creates users in a connection enabled for the caller. The passwordless `email` connection is shared by every customer, so it is set once, by hand (Dashboard > Authentication > Passwordless > Email): this application enabled (Applications tab), and **Disable Sign Ups** on, since an account created by a passwordless login would hold no application role.
 
 - At least one MFA factor enabled on the tenant (Security > Multi-factor Auth), for the MFA Action (`require_mfa = false` otherwise).
 
