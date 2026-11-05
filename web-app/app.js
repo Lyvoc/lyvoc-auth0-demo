@@ -154,11 +154,16 @@ app.get('/', (req, res) => {
 });
 
 // Errors of the login callback
-const SILENT_LOGIN_ERRORS = ['login_required', 'consent_required', 'interaction_required'];
 app.use((err, req, res, next) => {
-  // The silent SSO check ends with one of these when there is no Auth0
-  // session: expected, show the logged-out home page
-  if (SILENT_LOGIN_ERRORS.includes(err.error)) return res.redirect('/');
+  // Silent SSO check without Auth0 session: expected, show the logged-out
+  // home page
+  if (err.error === 'login_required') return res.redirect('/');
+  // Silent SSO check with an Auth0 session, but the user must act first
+  // (consent to this application, always asked on localhost): interactive
+  // login, which still asks no password
+  if (err.error === 'consent_required' || err.error === 'interaction_required') {
+    return res.oidc.login({ returnTo: '/' });
+  }
   // Denied by an Action (e.g. no role of the application)
   if (err.error === 'access_denied') {
     return res.status(403).type('html').send(page(`

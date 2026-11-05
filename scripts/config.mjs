@@ -25,7 +25,7 @@ if (!webAppUrl) {
 } else {
   // Kept across runs: a new configuration does not end the open sessions
   const previousSecret = existsSync(WEB_APP_ENV)
-    ? readFileSync(WEB_APP_ENV, "utf8").match(/^SESSION_SECRET=(.+)$/m)?.[1]
+    ? readFileSync(WEB_APP_ENV, "utf8").match(/^SESSION_SECRET="?([0-9a-f]+)"?$/m)?.[1]
     : undefined;
   const env = {
     PORT: new URL(webAppUrl).port || "3000",
@@ -39,9 +39,10 @@ if (!webAppUrl) {
     CLAIMS_NAMESPACE: config.claimsNamespace,
     PORTAL_URL: config.portalUrls?.[0] ?? "",
   };
+  // Quoted: dotenv reads an unquoted "#" (colors) as a comment
   writeFileSync(
     WEB_APP_ENV,
-    Object.entries(env).map(([key, value]) => `${key}=${value}`).join("\n") + "\n",
+    Object.entries(env).map(([key, value]) => `${key}=${JSON.stringify(value)}`).join("\n") + "\n",
     { mode: 0o600 }
   );
   console.log(`${WEB_APP_ENV}: ${webAppUrl}`);
