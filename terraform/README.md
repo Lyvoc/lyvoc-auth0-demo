@@ -100,7 +100,7 @@ Copy `customers/acme.tfvars` to `customers/<slug>.tfvars` and set:
 
 - `customer`: slug, name, logo and colors (the SPA theme, and the default branding of the organizations);
 - `organizations`: name, display name and optional logo / colors of each organization;
-- `test_users`: alias (email through `test_users_email_template`), name, `organizations` (`organization = "member"` or `"admin"`), `roles` (application roles) and app_metadata;
+- `test_users`: alias (email through `test_users_email_template`), name, `organizations` (`organization = "member"` or `"admin"`), `roles` (application roles) and app_metadata (`dae_role`: Delegated Administration extension role, given as a direct role);
 - optionally `app_name`, `roles`, `claims_namespace`, `spa_urls` / `web_app_urls` (deployed demo URLs).
 
 ## State

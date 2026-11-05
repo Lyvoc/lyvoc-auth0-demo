@@ -59,13 +59,18 @@ resource "auth0_user" "test" {
   }
 }
 
-# Application access: the application roles, held directly. Every account,
-# even without role: a role given during a demo is removed at the next apply.
+# Direct roles: the application roles (application access) and the Delegated
+# Administration extension role (app_metadata.dae_role), which the extension
+# reads on a login without organization. Every account, even without role: a
+# role given during a demo is removed at the next apply.
 resource "auth0_user_roles" "test" {
   for_each = var.test_users
 
   user_id = auth0_user.test[each.key].id
-  roles   = [for role in each.value.roles : auth0_role.app[role].id]
+  roles = concat(
+    [for role in each.value.roles : auth0_role.app[role].id],
+    [for role in compact([lookup(each.value.app_metadata, "dae_role", "")]) : data.auth0_role.dae[role].id]
+  )
 }
 
 # Organizations: membership with the organization role (member or admin)

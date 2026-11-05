@@ -174,6 +174,13 @@ variable "test_users" {
     ]))
     error_message = "test_users: organizations must map organizations declared in this file to an organization role (organization_roles), and roles must be declared in roles."
   }
+
+  validation {
+    condition = alltrue([
+      for user in values(var.test_users) : contains(concat([""], local.dae_role_names), lookup(user.app_metadata, "dae_role", ""))
+    ])
+    error_message = "test_users: app_metadata.dae_role must be a role of the Delegated Administration extension (\"Delegated Admin - Administrator\", \"- Operator\", \"- Auditor\" or \"- User\")."
+  }
 }
 
 variable "test_users_password" {
