@@ -113,6 +113,8 @@ output "web_app_client_secret" {
 output "dae" {
   description = "Values for the Delegated Administration extension hooks."
   value = var.enable_dae ? {
+    management_domain    = data.auth0_tenant.current.domain
+    users_connection     = data.auth0_connection.users.name
     management_client_id = auth0_client.dae_hooks[0].client_id
     app_client_id        = auth0_client.spa.client_id
     role_ids             = { for name, role in data.auth0_role.dae : name => role.id }

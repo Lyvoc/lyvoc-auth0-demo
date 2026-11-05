@@ -84,6 +84,7 @@ resource "auth0_client_grant" "dae_hooks" {
   audience  = data.auth0_tenant.current.management_api_identifier
   scopes = [
     "read:users",
+    "create:users",
     "update:users",
     "read:roles",
     "create:role_members",
@@ -94,6 +95,5 @@ resource "auth0_client_grant" "dae_hooks" {
     "read:organization_member_roles",
     "create:organization_member_roles",
     "delete:organization_member_roles",
-    "create:organization_invitations",
   ]
 }

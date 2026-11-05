@@ -3,13 +3,17 @@
 // - src/config/demo.json: the portal's configuration (no secret but the test
 //   accounts' password, shown on the portal)
 // - web-app/.env: the web application's settings, with its client secret
-// Both files are git-ignored.
+// - dae-hooks/generated/: the Delegated Administration extension hooks to
+//   paste, with the Management API credentials of their M2M application
+// All git-ignored.
 import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 
 const PORTAL_CONFIG = "src/config/demo.json";
 const WEB_APP_ENV = "web-app/.env";
+const DAE_HOOKS = "dae-hooks";
+const DAE_HOOKS_GENERATED = "dae-hooks/generated";
 
 const outputs = JSON.parse(
   execFileSync("terraform", ["-chdir=terraform", "output", "-json"], { encoding: "utf8" })
@@ -46,4 +50,24 @@ if (!webAppUrl) {
     { mode: 0o600 }
   );
   console.log(`${WEB_APP_ENV}: ${webAppUrl}`);
+}
+
+const dae = outputs.dae?.value;
+if (!dae) {
+  console.log(`${DAE_HOOKS_GENERATED}: skipped (enable_dae = false)`);
+} else {
+  const values = {
+    __MANAGEMENT_DOMAIN__: dae.management_domain,
+    __CLIENT_ID__: dae.management_client_id,
+    __CLIENT_SECRET__: outputs.dae_management_client_secret.value,
+    __USERS_CONNECTION__: dae.users_connection,
+  };
+  mkdirSync(DAE_HOOKS_GENERATED, { recursive: true, mode: 0o700 });
+  const hooks = readdirSync(DAE_HOOKS).filter((name) => name.endsWith(".js"));
+  for (const name of hooks) {
+    const source = readFileSync(`${DAE_HOOKS}/${name}`, "utf8");
+    const hook = Object.entries(values).reduce((text, [key, value]) => text.replaceAll(key, value), source);
+    writeFileSync(`${DAE_HOOKS_GENERATED}/${name}`, hook, { mode: 0o600 });
+  }
+  console.log(`${DAE_HOOKS_GENERATED}: ${hooks.length} hooks`);
 }

@@ -9,7 +9,7 @@ A reusable Auth0 demo, branded for each prospect in a few minutes: a demo portal
 - **Login methods**: password, passwordless (code by email), step-up MFA (only when the portal asks for it).
 - **Single sign-on**: logged in to the portal, the user opens the web application without typing a password again; the access rules apply there too.
 - **Administration**: the [Admin UI](https://github.com/Lyvoc/lyvoc-auth0-admin-ui) manages the demo's users, organizations and roles; the changes show in the portal's tokens at the next login.
-- **Delegated Administration extension (DAE)**: work in progress (the test accounts already hold their DAE role).
+- **Delegated Administration extension (DAE)**: Auth0's delegated user management, next to the Admin UI: `acme-admin` manages the users of his organization only (see [dae-hooks/](dae-hooks/README.md)).
 
 ## Repository layout
 
@@ -19,7 +19,7 @@ A reusable Auth0 demo, branded for each prospect in a few minutes: a demo portal
 | `src/` | The demo portal (Vite, React, Auth0 SPA SDK), configured by `src/config/demo.json` (generated, git-ignored) |
 | `web-app/` | The web application of the single sign-on demo (Express, `express-openid-connect`), configured by `web-app/.env` (generated, git-ignored) |
 | `scripts/config.mjs` | `npm run config`: writes both configurations from Terraform's outputs |
-| `dae-hooks/` | Hooks of the Delegated Administration extension (still specific to the Fluidra demo) |
+| [`dae-hooks/`](dae-hooks/README.md) | Hooks of the Delegated Administration extension: delegated admins manage the users of their organizations |
 | `server.js`, `workers/`, `wrangler.toml` | Backend of an earlier Custom Token Exchange demo (its page is hidden unless enabled) |
 | `docs/` | Guides of the earlier demos, to be reviewed |
 
