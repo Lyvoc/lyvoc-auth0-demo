@@ -12,7 +12,7 @@ Creates, on a shared Auth0 demo tenant, everything one customer's demo needs, br
 | Organizations | from `organizations` | Logo and colors per organization (login page branding) |
 | Application roles | `<app_name>:<role>` | Admin UI naming convention, with their API permissions. Held directly: application access |
 | Organization roles | `member`, `admin` (existing) | The Admin UI's tenant-wide roles: looked up, this demo adds its API permissions to them |
-| Test users | from `test_users` | Application roles and organization memberships (two separate lists), one shared password, `app_metadata` role cache read by the Admin UI (reset at every apply), a passwordless twin with the same application roles |
+| Test users | from `test_users` | Application roles and organization memberships (two separate lists), one shared password, `app_metadata` role cache read by the Admin UI (reset at every apply), passwordless identity linked to the account (one account, two ways to log in: `scripts/link-passwordless.py`) |
 | Actions (post-login) | `<Customer> - Demo access`, `<Customer> - Demo MFA` | Only run for the demo apps |
 | DAE hooks M2M | `<Customer> - DAE hooks` | Management API access for the Delegated Administration hooks |
 
@@ -39,7 +39,7 @@ On an organization login Auth0 only puts the organization's roles in the token: 
 
 ## Prerequisites
 
-- Terraform >= 1.9.
+- Terraform >= 1.9 and Python 3 (account linking script, standard library only).
 - The organization roles `member` and `admin` on the tenant (the Admin UI's roles, shared by every customer).
 - A machine-to-machine application on the tenant, authorized on the **Auth0 Management API** with all its permissions (Dashboard > Applications > Create Application > Machine to Machine). Its credentials go in `terraform/.env.<tenant>` (git-ignored), never in the repository:
 

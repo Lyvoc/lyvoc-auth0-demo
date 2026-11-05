@@ -30,10 +30,8 @@ locals {
     }
   }
 
-  # Passwordless logins are separate users of the "email" connection, outside
-  # any organization: each test account with an application role gets one,
-  # with the same roles
-  passwordless_test_users = var.enable_passwordless_email ? { for alias, user in var.test_users : alias => user if length(user.roles) > 0 } : {}
+  # Test accounts that can also log in with a passwordless code
+  passwordless_test_users = var.enable_passwordless_email ? var.test_users : {}
 }
 
 # The Management API only creates users in a database enabled for the caller
@@ -62,9 +60,10 @@ resource "auth0_user" "test" {
   }
 }
 
-# Application access: the application roles, held directly
+# Application access: the application roles, held directly. Every account,
+# even without role: a role given during a demo is removed at the next apply.
 resource "auth0_user_roles" "test" {
-  for_each = { for alias, user in var.test_users : alias => user if length(user.roles) > 0 }
+  for_each = var.test_users
 
   user_id = auth0_user.test[each.key].id
   roles   = [for role in each.value.roles : auth0_role.app[role].id]
@@ -88,25 +87,39 @@ resource "auth0_organization_member_roles" "test" {
   depends_on = [auth0_organization_member.test]
 }
 
-resource "auth0_user" "passwordless" {
+# Passwordless login: the passwordless identity is linked to the account (one
+# account, two ways to log in, same roles and organizations). The provider has
+# no account linking resource: a script calls the Management API, with
+# Terraform's credentials. Linking again after the account is recreated.
+resource "terraform_data" "passwordless_link" {
   for_each = local.passwordless_test_users
 
-  connection_name = data.auth0_connection.email[0].name
-  email           = local.test_user_emails[each.key]
-  name            = each.value.name
-  email_verified  = true
-  app_metadata = jsonencode(merge(each.value.app_metadata, local.test_users_role_metadata[each.key], {
-    organizations = []
-  }))
+  triggers_replace = [auth0_user.test[each.key].id, local.test_user_emails[each.key]]
 
-  lifecycle {
-    ignore_changes = [user_metadata]
+  provisioner "local-exec" {
+    command = "python3 ${path.module}/scripts/link-passwordless.py"
+    environment = {
+      PRIMARY_USER_ID = auth0_user.test[each.key].id
+      EMAIL           = local.test_user_emails[each.key]
+      CONNECTION      = data.auth0_connection.email[0].name
+    }
   }
 }
 
-resource "auth0_user_roles" "passwordless" {
-  for_each = local.passwordless_test_users
+# Former separate passwordless users: forgotten, not deleted (the link script
+# links them to their account)
+removed {
+  from = auth0_user.passwordless
 
-  user_id = auth0_user.passwordless[each.key].id
-  roles   = [for role in each.value.roles : auth0_role.app[role].id]
+  lifecycle {
+    destroy = false
+  }
+}
+
+removed {
+  from = auth0_user_roles.passwordless
+
+  lifecycle {
+    destroy = false
+  }
 }
