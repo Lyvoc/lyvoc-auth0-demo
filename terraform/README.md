@@ -54,7 +54,7 @@ On an organization login Auth0 only puts the organization's roles in the token: 
   export TF_VAR_test_users_password="<password>"
   ```
 
-  The demo database is enabled for this application: the Management API only creates users in a connection enabled for the caller. The passwordless `email` connection is shared by every customer, so it is set once, by hand (Dashboard > Authentication > Passwordless > Email): this application enabled (Applications tab), and **Disable Sign Ups** on, since an account created by a passwordless login would hold no application role.
+  The demo database is enabled for this application: the Management API only creates users in a connection enabled for the caller. The passwordless `email` connection is shared by every customer, so it is set once, by hand (Dashboard > Authentication > Passwordless > Email): this application enabled (Applications tab), and **Disable Sign Ups** on, since an account created by a passwordless login would hold no application role. Auth0 then still shows "We've sent an email with your code" for an unknown address (it never tells which addresses have an account): the text of that screen is reworded, for every language of the tenant (Branding > Universal Login > Advanced Options > Custom Text, prompt `login-passwordless`, screen `login-passwordless-email-code`, key `description`), e.g. "If an account is linked to ${email}, you will receive an email with your code."
 
 - At least one MFA factor enabled on the tenant (Security > Multi-factor Auth), for the MFA Action (`require_mfa = false` otherwise).
 
