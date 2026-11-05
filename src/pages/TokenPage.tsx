@@ -20,7 +20,7 @@ const decodeJWT = (token: string) => {
 
 
 const TokenPage = () => {
-  const { isAuthenticated, isLoading, getAccessTokenSilently, getIdTokenClaims, user, error: authError } = useAuth0();
+  const { isAuthenticated, isLoading, getAccessTokenSilently, getIdTokenClaims, loginWithRedirect, user, error: authError } = useAuth0();
   const [accessToken, setAccessToken] = React.useState<string>("");
   const [idTokenValue, setIdTokenValue] = React.useState<string>("");
   const [error, setError] = React.useState<string>("");
@@ -128,7 +128,14 @@ const TokenPage = () => {
         <div style={{ color: "#b2b7c2", margin: "16px 0 24px 0", fontSize: 16 }}>
           {authError.message}
         </div>
-        <LoginButton />
+        {/* The Auth0 session survives a denied login: ask for the credentials
+            again, or the next login silently reuses it (without organization) */}
+        <button
+          onClick={() => loginWithRedirect({ authorizationParams: { prompt: "login" } })}
+          className="button login"
+        >
+          Log In Again
+        </button>
       </div>
     );
   }
