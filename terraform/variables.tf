@@ -5,11 +5,6 @@
 # prefixed with the customer, and tenant-wide settings (theme, MFA factors,
 # prompts, email provider, tenant settings) are left untouched.
 
-variable "terraform_client_id" {
-  description = "Client ID of the Terraform M2M application (TF_VAR_terraform_client_id=$AUTH0_CLIENT_ID): the demo database is enabled for it, which the Management API requires to create the test users."
-  type        = string
-}
-
 variable "customer" {
   description = "Customer the demo is branded for."
   type = object({
@@ -199,10 +194,10 @@ variable "test_users_email_template" {
   }
 }
 
-variable "allow_public_signup" {
-  description = "Whether users can sign up to the demo database (self-service registration demo)."
-  type        = bool
-  default     = true
+variable "users_connection" {
+  description = "Users database shared by every customer of the tenant (the Admin UI's AUTH0_USERS_CONNECTION, created by its npm run auth0:setup): looked up, never managed here. The Admin UI admins stay in their own database."
+  type        = string
+  default     = "users-db"
 }
 
 variable "mfa" {

@@ -7,7 +7,7 @@ Creates, on a shared Auth0 demo tenant, everything one customer's demo needs, br
 | SPA | `<app_name>` (default `<Customer> Portal`) | The React app of this repository. Callbacks `<origin>/token` |
 | Regular web app | `<app_name> Web` | SSO between two applications. Callbacks `<origin>/callback` |
 | API | `<Customer> - Demo API` | Scopes `read:data` / `write:data` (application roles), `read:organization` / `update:organization` / `manage:members` (organization roles), RBAC (permissions in the access token) |
-| Database | `<slug>-users` | Username/password, enabled on both apps and every organization |
+| Database | `users-db` (existing, `users_connection`) | The tenant's single users database, shared by every customer (the Admin UI's): looked up, enabled on both apps and every organization. The Admin UI admins stay in their own database |
 | Passwordless | `email` (existing) | One per tenant: looked up, enabled on the apps only: organization logins use the password |
 | Organizations | from `organizations` | Logo and colors per organization (login page branding) |
 | Application roles | `<app_name>:<role>` | Admin UI naming convention, with their API permissions. Held directly: application access |
@@ -47,14 +47,15 @@ On an organization login Auth0 only puts the organization's roles in the token: 
   export AUTH0_DOMAIN=<tenant>.eu.auth0.com
   export AUTH0_CLIENT_ID=<client id>
   export AUTH0_CLIENT_SECRET=<client secret>
-  export TF_VAR_terraform_client_id="$AUTH0_CLIENT_ID"
   # Mailbox receiving the test accounts' emails (passwordless and MFA codes), %s = account alias
   export TF_VAR_test_users_email_template="firstname.lastname+%s@lyvoc.com"
   # Password of all the test accounts (generated when not set), shown on the demo site
   export TF_VAR_test_users_password="<password>"
   ```
 
-  The demo database is enabled for this application: the Management API only creates users in a connection enabled for the caller. The passwordless `email` connection is shared by every customer, so it is set once, by hand (Dashboard > Authentication > Passwordless > Email): this application enabled (Applications tab), and **Disable Sign Ups** on, since an account created by a passwordless login would hold no application role. Auth0 then still shows "We've sent an email with your code" for an unknown address (it never tells which addresses have an account): the text of that screen is reworded, for every language of the tenant (Branding > Universal Login > Advanced Options > Custom Text, prompt `login-passwordless`, screen `login-passwordless-email-code`, key `description`), e.g. "If an account is linked to ${email}, you will receive an email with your code."
+- Shared by every customer, so set once, by hand (Terraform never changes them):
+  - the users database (`users-db`, created by the Admin UI's `npm run auth0:setup`): this application enabled (Dashboard > Authentication > Database > users-db > Applications), since the Management API only creates users in a connection enabled for the caller; **Disable Sign Ups** on (accounts come from the Admin UI or Terraform: a self-registered one would hold no application role);
+  - the passwordless `email` connection (Dashboard > Authentication > Passwordless > Email): this application enabled, and **Disable Sign Ups** on. Auth0 then still shows "We've sent an email with your code" for an unknown address (it never tells which addresses have an account): the text of that screen is reworded, for every language of the tenant (Branding > Universal Login > Advanced Options > Custom Text, prompt `login-passwordless`, screen `login-passwordless-email-code`, key `description`), e.g. "If an account is linked to ${email}, you will receive an email with your code."
 
 - At least one MFA factor enabled on the tenant (Security > Multi-factor Auth), for the MFA Action (`require_mfa = false` otherwise).
 

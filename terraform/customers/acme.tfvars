@@ -13,10 +13,6 @@ web_app_urls = ["http://localhost:3000"]
 
 admin_ui_url = "https://admin-ui-demo.lyvoc.com"
 
-# Accounts are created by the Admin UI or Terraform only: a self-registered
-# account would hold no application role (denied anyway)
-allow_public_signup = false
-
 # MFA is shown on demand (demo step), not required at every login
 mfa = "step-up"
 

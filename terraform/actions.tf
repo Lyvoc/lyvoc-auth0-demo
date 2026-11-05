@@ -73,7 +73,7 @@ resource "auth0_action" "mfa" {
 
   secrets {
     name  = "DATABASE_CONNECTION"
-    value = auth0_connection.users.name
+    value = data.auth0_connection.users.name
   }
 
   secrets {

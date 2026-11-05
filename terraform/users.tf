@@ -34,18 +34,16 @@ locals {
   passwordless_test_users = var.enable_passwordless_email ? var.test_users : {}
 }
 
-# The Management API only creates users in a database enabled for the caller
-resource "auth0_connection_client" "terraform" {
-  connection_id = auth0_connection.users.id
-  client_id     = var.terraform_client_id
+# An account cannot move to another database: changing the users database
+# recreates the test accounts (see replace_triggered_by)
+resource "terraform_data" "users_connection" {
+  input = data.auth0_connection.users.id
 }
 
 resource "auth0_user" "test" {
   for_each = var.test_users
 
-  depends_on = [auth0_connection_client.terraform]
-
-  connection_name = auth0_connection.users.name
+  connection_name = data.auth0_connection.users.name
   email           = local.test_user_emails[each.key]
   name            = each.value.name
   email_verified  = true
@@ -56,7 +54,8 @@ resource "auth0_user" "test" {
   app_metadata = jsonencode(merge(each.value.app_metadata, local.test_users_role_metadata[each.key]))
 
   lifecycle {
-    ignore_changes = [user_metadata]
+    ignore_changes       = [user_metadata]
+    replace_triggered_by = [terraform_data.users_connection]
   }
 }
 

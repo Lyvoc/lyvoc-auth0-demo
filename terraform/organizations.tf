@@ -24,7 +24,7 @@ resource "auth0_organization" "this" {
 resource "auth0_organization_connection" "this" {
   for_each = {
     for org in keys(var.organizations) :
-    "${org}/users" => { org = org, connection_id = auth0_connection.users.id }
+    "${org}/users" => { org = org, connection_id = data.auth0_connection.users.id }
   }
 
   organization_id            = auth0_organization.this[each.value.org].id

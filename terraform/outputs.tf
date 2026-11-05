@@ -22,7 +22,7 @@ output "demo_config" {
     }
     claimsNamespace = local.claims_namespace
     connections = {
-      database     = auth0_connection.users.name
+      database     = data.auth0_connection.users.name
       passwordless = var.enable_passwordless_email ? "email" : null
     }
     organizations = [

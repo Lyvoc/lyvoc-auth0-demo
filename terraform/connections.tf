@@ -1,23 +1,8 @@
-# Users database of the demo (username/password)
-resource "auth0_connection" "users" {
-  name     = "${local.slug}-users"
-  strategy = "auth0"
-
-  options {
-    disable_signup         = !var.allow_public_signup
-    requires_username      = false
-    brute_force_protection = true
-    password_policy        = "good"
-
-    password_history {
-      enable = true
-      size   = 5
-    }
-
-    password_no_personal_info {
-      enable = true
-    }
-  }
+# Users database shared by every customer of the tenant (the Admin UI's users
+# database): only looked up. Its settings (password policy, sign-up disabled)
+# are the tenant's, set once.
+data "auth0_connection" "users" {
+  name = var.users_connection
 }
 
 # Tenant's passwordless email connection: one per tenant, shared with the
@@ -30,7 +15,7 @@ data "auth0_connection" "email" {
 
 locals {
   connection_ids = merge(
-    { users = auth0_connection.users.id },
+    { users = data.auth0_connection.users.id },
     var.enable_passwordless_email ? { email = data.auth0_connection.email[0].id } : {}
   )
   application_ids = {
