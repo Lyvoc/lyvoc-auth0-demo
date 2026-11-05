@@ -103,6 +103,27 @@ Copy `customers/acme.tfvars` to `customers/<slug>.tfvars` and set:
 - `test_users`: alias (email through `test_users_email_template`), name, `organizations` (`organization = "member"` or `"admin"`), `roles` (application roles), `receives_emails` (real mailbox and passwordless login; otherwise `<alias>@example.com`) and app_metadata (`dae_role`: Delegated Administration extension role, given as a direct role);
 - optionally `app_name`, `roles`, `claims_namespace`, `spa_urls` / `web_app_urls` (deployed demo URLs).
 
+## What the customer variables drive
+
+Nothing customer-specific is hard-coded: every name derives from the customer file (`main.tf`), and the portal reads its configuration from Terraform.
+
+| Derived from the customer | Acme |
+|---|---|
+| Application name (`app_name`, default `<name> Portal`) | `Acme Portal`, `Acme Portal Web` |
+| Application roles (`<app_name>:<role>`) | `Acme Portal:admin`, `Acme Portal:b2b_customer`, `Acme Portal:buyer` |
+| API (`api_identifier`, default `https://<slug>.demo/api`) | `Acme - Demo API`, `https://acme.demo/api` |
+| Custom claims namespace (`claims_namespace`, default `https://<slug>.demo/`) | `https://acme.demo/app_roles`, … |
+| Actions | `Acme - Demo access`, `Acme - Demo MFA` |
+| Organization login pages | Each organization's logo and colors, else the customer's |
+
+Changing `app_name` renames the roles: Terraform recreates and reassigns them for the test accounts, but roles given by hand (Admin UI) are lost.
+
+The portal follows the customer without code change:
+
+1. `terraform output -json demo_config` gathers what the portal needs: customer name, logo and colors, Auth0 client and audience, claims namespace, connections, organizations (IDs and branding), roles, test accounts and their password, Admin UI and DAE URLs, enabled features.
+2. `npm run config` writes it to `src/config/demo.json` (git-ignored, one customer at a time).
+3. The portal reads it (`src/config/demo.ts`): theme (`src/context/ThemeContext.tsx`), organizations (`src/config/organizationBranding.ts`), the welcome page's Demo Test Plan and test accounts, the Admin UI and DAE links. Without the file, the portal falls back to a neutral configuration and the `VITE_AUTH0_*` variables of `.env`.
+
 ## State
 
 Local for now (`terraform.tfstate.d/<workspace>/`, git-ignored): it holds the client secrets and the test password, keep it on your machine. It moves to S3 with the GitHub pipeline.
