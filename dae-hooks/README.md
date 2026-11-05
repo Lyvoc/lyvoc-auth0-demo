@@ -17,6 +17,7 @@ No customer-specific value: organizations and roles are looked up by name, so th
 The extension, its "DAE App" application and its hooks are shared by the whole tenant: Terraform only creates the Management API application the hooks use (`<Customer> - DAE hooks`).
 
 1. **DAE App** (Dashboard > Applications): only `https://<tenant>.<region>.webtask.run/auth0-delegated-admin/login` in the Allowed Callback URLs; Connections tab: the users database (`users-db`) only.
+   The extension checks the `read:users` permission of the logged-in admin on its API: on demo-lyvoc, the APIs "DAE" (`https://testdae`) and "test" (`https://test:api`), whose `read:users` permission the 4 `Delegated Admin - …` roles hold. **Never delete them** ("Missing scope read:users" in the DAE otherwise).
 2. `npm run config` (repository root): writes the hooks with the Management API credentials to `dae-hooks/generated/` (git-ignored: never commit them).
 3. Open the DAE (the portal's DAE Extension page) with an account holding `Delegated Admin - Administrator`, then **Configuration > Hooks**: paste each file of `dae-hooks/generated/` into its hook, and save.
 
