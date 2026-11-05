@@ -1,9 +1,9 @@
 # Values for the demo app and the DAE hooks
 
 # Configuration of the demo app (no secret but the test accounts' password,
-# shown on the demo site):
-#   terraform output -json demo_config > ../src/config/demo.json
-# (npm run config, at the repository root)
+# shown on the demo site): written to src/config/demo.json by `npm run config`
+# (scripts/config.mjs, at the repository root), with the web application's
+# settings (web-app/.env)
 output "demo_config" {
   description = "Configuration of the demo app (src/config/demo.json)."
   value = {
@@ -58,6 +58,7 @@ output "demo_config" {
       }
     ]
     testUsersPassword = nonsensitive(local.test_users_password)
+    portalUrls        = var.spa_urls
     webAppUrls        = var.web_app_urls
     adminUiUrl        = var.admin_ui_url
     daeUrl            = var.enable_dae ? local.dae_url : ""

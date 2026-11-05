@@ -52,6 +52,7 @@ export interface DemoConfig {
   applications: DemoApplication[];
   testUsers: DemoTestUser[];
   testUsersPassword: string;
+  portalUrls?: string[];
   webAppUrls: string[];
   adminUiUrl: string;
   daeUrl: string;

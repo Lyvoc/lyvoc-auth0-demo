@@ -111,6 +111,17 @@ const useTestPlan = (): TestStep[] => {
     });
   }
 
+  const webAppUrl = demoConfig.webAppUrls[0];
+  if (webAppUrl) {
+    steps.push({
+      title: "Single sign-on to a second application",
+      where: `Web application (npm run web): ${webAppUrl}`,
+      account: testUsers.find((user) => user.roles.length > 0)?.email,
+      note: "Log in to the portal first, then open the web application: no password asked, same Auth0 session. An account without application access is denied there too.",
+      action: { label: "Open the web application", run: () => window.open(webAppUrl, "_blank", "noopener") },
+    });
+  }
+
   const directUser = testUsers.find((user) => user.memberships.length === 0 && user.roles.length > 0);
   if (directUser) {
     steps.push({

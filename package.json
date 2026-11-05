@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "config": "terraform -chdir=terraform output -json demo_config > src/config/demo.json",
+    "config": "node scripts/config.mjs",
+    "web": "npm --prefix web-app start",
     "dev:backend": "node server.js",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:backend\"",
     "build": "vite build",
