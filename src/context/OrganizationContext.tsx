@@ -123,12 +123,12 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
       roles.push(...claims.permissions);
     }
 
-    // Organization roles (custom namespace, set by the "Demo claims" Action)
-    const orgRolesClaim = claims[claimName("org_roles")] ||
-                          claims["org_roles"] ||
+    // Application roles (custom namespace, set by the "Demo access" Action)
+    const appRolesClaim = claims[claimName("app_roles")] ||
+                          claims["app_roles"] ||
                           claims["roles"];
-    if (Array.isArray(orgRolesClaim)) {
-      roles.push(...orgRolesClaim);
+    if (Array.isArray(appRolesClaim)) {
+      roles.push(...appRolesClaim);
     }
 
     // App metadata roles

@@ -303,7 +303,7 @@ const OrganizationPage: React.FC = () => {
                       style={orgButtonStyle(org?.primaryColor || primaryColor)}
                       onClick={() => handleBrandedLogin(m.organization)}
                     >
-                      Login to {org?.displayName || m.organization} ({m.roles.join(", ")})
+                      Login to {org?.displayName || m.organization} ({m.role})
                     </button>
                   );
                 })}
@@ -400,12 +400,18 @@ const OrganizationPage: React.FC = () => {
                   )}
                   <div style={{ fontFamily: "monospace", fontSize: "0.85rem", background: "var(--bg-secondary)", padding: "0.75rem", borderRadius: "6px", marginTop: "0.75rem" }}>
                     <div><span style={{ color: "var(--text-muted)" }}>Email:</span> <span style={{ color: "var(--text-primary)" }}>{user.email}</span></div>
-                    {user.memberships.map((m) => (
-                      <div key={m.organization}>
-                        <span style={{ color: "var(--text-muted)" }}>{m.organization}:</span>{" "}
-                        <span style={{ color: "var(--text-secondary)" }}>{m.roles.join(", ")} → {appNames(m.roles).join(", ") || "no application"}</span>
-                      </div>
-                    ))}
+                    <div>
+                      <span style={{ color: "var(--text-muted)" }}>Application:</span>{" "}
+                      <span style={{ color: "var(--text-secondary)" }}>
+                        {user.roles.length > 0 ? `${user.roles.join(", ")} → ${appNames(user.roles).join(", ") || "no tile"}` : "no access"}
+                      </span>
+                    </div>
+                    <div>
+                      <span style={{ color: "var(--text-muted)" }}>Organizations:</span>{" "}
+                      <span style={{ color: "var(--text-secondary)" }}>
+                        {user.memberships.map((m) => `${m.organization} (${m.role})`).join(", ") || "none"}
+                      </span>
+                    </div>
                     {user.daeRole && (
                       <div><span style={{ color: "var(--text-muted)" }}>DAE:</span> <span style={{ color: "var(--text-secondary)" }}>{user.daeRole}</span></div>
                     )}

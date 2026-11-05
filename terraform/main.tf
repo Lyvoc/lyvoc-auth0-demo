@@ -35,11 +35,11 @@ locals {
     alias => var.test_users_email_template != "" ? format(var.test_users_email_template, alias) : "${alias}@example.com"
   }
 
-  # One entry per (user, organization)
+  # One entry per (user, organization), with the organization role
   memberships = {
     for m in flatten([
       for alias, user in var.test_users : [
-        for org, roles in user.memberships : { alias = alias, org = org, roles = roles }
+        for org, role in user.organizations : { alias = alias, org = org, role = role }
       ]
     ]) : "${m.alias}/${m.org}" => m
   }

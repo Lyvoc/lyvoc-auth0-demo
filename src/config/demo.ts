@@ -26,7 +26,10 @@ export interface DemoTestUser {
   email: string;
   name: string;
   description: string;
-  memberships: { organization: string; roles: string[] }[];
+  // Two separate permission lists: organizations (with the organization role)
+  // and the application roles, held directly (application access)
+  memberships: { organization: string; role: string }[];
+  roles: string[];
   daeRole: string;
 }
 

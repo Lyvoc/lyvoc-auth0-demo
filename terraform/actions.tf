@@ -5,13 +5,21 @@
 
 locals {
   demo_client_ids = join(",", [auth0_client.spa.id, auth0_client.web.id])
+
+  # Permissions of every role the access Action combines
+  role_permissions = merge(
+    { for name, role in var.roles : "${local.role_prefix}${name}" => role.permissions },
+    var.organization_roles
+  )
 }
 
+# Application access (application roles) and claims of the two permission
+# lists (application roles, organization roles)
 resource "auth0_action" "claims" {
-  name    = "${var.customer.name} - Demo claims"
+  name    = "${var.customer.name} - Demo access"
   runtime = "node22"
   deploy  = true
-  code    = file("${path.module}/actions/demo-claims.js")
+  code    = file("${path.module}/actions/demo-access.js")
 
   supported_triggers {
     id      = "post-login"
@@ -31,6 +39,11 @@ resource "auth0_action" "claims" {
   secrets {
     name  = "ROLE_PREFIX"
     value = local.role_prefix
+  }
+
+  secrets {
+    name  = "ROLE_PERMISSIONS"
+    value = jsonencode(local.role_permissions)
   }
 }
 

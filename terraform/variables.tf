@@ -142,26 +142,42 @@ variable "applications" {
   }
 }
 
+variable "organization_roles" {
+  description = "Permissions on the demo API of the organization roles (member, admin). The roles are the Admin UI's tenant-wide ones, shared by every customer: they must exist on the tenant (looked up, never created here)."
+  type        = map(list(string))
+  default = {
+    member = ["read:organization"]
+    admin  = ["read:organization", "update:organization", "manage:members"]
+  }
+
+  validation {
+    condition = alltrue(concat(
+      [for role in keys(var.organization_roles) : contains(["member", "admin"], role)],
+      flatten([for permissions in values(var.organization_roles) : [for p in permissions : contains(["read:organization", "update:organization", "manage:members"], p)]])
+    ))
+    error_message = "organization_roles: member and/or admin, with organization scopes (read:organization, update:organization, manage:members)."
+  }
+}
+
 variable "test_users" {
-  description = "Test accounts (key = alias, see test_users_email_template) with their organization memberships (organization name => roles)."
+  description = "Test accounts (key = alias, see test_users_email_template). Organizations and applications are two separate permission lists: organizations = organization name => organization role (member or admin); roles = roles of the demo application, held directly (application access)."
   type = map(object({
-    name         = string
-    description  = optional(string, "")
-    memberships  = optional(map(list(string)), {})
-    app_metadata = optional(map(string), {})
+    name          = string
+    description   = optional(string, "")
+    organizations = optional(map(string), {})
+    roles         = optional(list(string), [])
+    app_metadata  = optional(map(string), {})
   }))
   default = {}
 
   validation {
     condition = alltrue(flatten([
-      for user in values(var.test_users) : [
-        for org, roles in user.memberships : concat(
-          [contains(keys(var.organizations), org)],
-          [for role in roles : contains(keys(var.roles), role)]
-        )
-      ]
+      for user in values(var.test_users) : concat(
+        [for org, role in user.organizations : contains(keys(var.organizations), org) && contains(keys(var.organization_roles), role)],
+        [for role in user.roles : contains(keys(var.roles), role)]
+      )
     ]))
-    error_message = "test_users: memberships must use organizations and roles declared in this file."
+    error_message = "test_users: organizations must map organizations declared in this file to an organization role (organization_roles), and roles must be declared in roles."
   }
 }
 

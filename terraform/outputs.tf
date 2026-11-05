@@ -50,7 +50,8 @@ output "demo_config" {
         email       = local.test_user_emails[alias]
         name        = user.name
         description = user.description
-        memberships = [for org, roles in user.memberships : { organization = org, roles = roles }]
+        memberships = [for org, role in user.organizations : { organization = org, role = role }]
+        roles       = user.roles
         daeRole     = lookup(user.app_metadata, "dae_role", "")
       }
     ]
@@ -122,7 +123,12 @@ output "dae_management_client_secret" {
 
 output "test_users" {
   description = "Test accounts (password: terraform output -raw test_users_password)."
-  value       = { for alias, user in var.test_users : local.test_user_emails[alias] => user.memberships }
+  value = {
+    for alias, user in var.test_users : local.test_user_emails[alias] => {
+      organizations = user.organizations
+      roles         = user.roles
+    }
+  }
 }
 
 output "test_users_password" {

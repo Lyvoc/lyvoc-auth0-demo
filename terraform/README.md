@@ -6,13 +6,14 @@ Creates, on a shared Auth0 demo tenant, everything one customer's demo needs, br
 |---|---|---|
 | SPA | `<app_name>` (default `<Customer> Portal`) | The React app of this repository. Callbacks `<origin>/token` |
 | Regular web app | `<app_name> Web` | SSO between two applications. Callbacks `<origin>/callback` |
-| API | `<Customer> - Demo API` | Scopes `read:data` / `write:data`, RBAC (permissions in the access token) |
+| API | `<Customer> - Demo API` | Scopes `read:data` / `write:data` (application roles), `read:organization` / `update:organization` / `manage:members` (organization roles), RBAC (permissions in the access token) |
 | Database | `<slug>-users` | Username/password, enabled on both apps and every organization |
 | Passwordless | `email` (existing) | One per tenant: looked up, enabled on the apps only (a passwordless login is a separate user, not an organization member) |
 | Organizations | from `organizations` | Logo and colors per organization (login page branding) |
-| Roles | `<app_name>:<role>` | Admin UI naming convention, with their API permissions |
-| Test users | from `test_users` | Organization members with their roles, one shared password, `app_metadata` role cache read by the Admin UI (reset at every apply) |
-| Actions (post-login) | `<Customer> - Demo claims`, `<Customer> - Demo MFA` | Only run for the demo apps |
+| Application roles | `<app_name>:<role>` | Admin UI naming convention, with their API permissions. Held directly: application access |
+| Organization roles | `member`, `admin` (existing) | The Admin UI's tenant-wide roles: looked up, this demo adds its API permissions to them |
+| Test users | from `test_users` | Application roles and organization memberships (two separate lists), one shared password, `app_metadata` role cache read by the Admin UI (reset at every apply), a passwordless twin with the same application roles |
+| Actions (post-login) | `<Customer> - Demo access`, `<Customer> - Demo MFA` | Only run for the demo apps |
 | DAE hooks M2M | `<Customer> - DAE hooks` | Management API access for the Delegated Administration hooks |
 
 The tenant is shared with other demos and with the Admin UI:
@@ -21,9 +22,25 @@ The tenant is shared with other demos and with the Admin UI:
 - Tenant-wide settings are **not** managed: tenant settings, MFA factors, Universal Login theme and prompts, email provider, the passwordless `email` connection, the Delegated Administration extension and its roles.
 - Actions are bound one by one (`auth0_trigger_action`): binding them with `auth0_trigger_actions` would replace the whole post-login flow, unbinding the Admin UI's Action.
 
+## Access model
+
+Organizations and applications are two separate permission lists:
+
+- **Applications**: an application role (`<app_name>:admin`, `b2b_customer`, `buyer`), held directly, gives access to the application. Users without one are denied by the `<Customer> - Demo access` Action, organization member or not.
+- **Organizations**: membership, with an organization role (`member` reads the organization's data, `admin` also updates it and manages its members). Only members log in through an organization (checked by Auth0).
+
+| User | Login without organization | Login through organization X |
+|---|---|---|
+| Organizations + application role | Allowed: application permissions | Allowed (member of X): application + organization permissions |
+| Application role, no organization | Allowed: application permissions | Denied: not a member |
+| Organizations, no application role | Denied: no application access | Denied: no application access |
+
+On an organization login Auth0 only puts the organization's roles in the token: the Action reads the application roles from the `app_metadata.roles` cache kept by the Admin UI, and adds the claims `app_roles`, `org_roles`, `organizations` and `permissions` (application + organization roles).
+
 ## Prerequisites
 
 - Terraform >= 1.9.
+- The organization roles `member` and `admin` on the tenant (the Admin UI's roles, shared by every customer).
 - A machine-to-machine application on the tenant, authorized on the **Auth0 Management API** with all its permissions (Dashboard > Applications > Create Application > Machine to Machine). Its credentials go in `terraform/.env.<tenant>` (git-ignored), never in the repository:
 
   ```bash
@@ -37,7 +54,7 @@ The tenant is shared with other demos and with the Admin UI:
   export TF_VAR_test_users_password="<password>"
   ```
 
-  The demo database is enabled for this application: the Management API only creates users in a database enabled for the caller.
+  The demo database is enabled for this application: the Management API only creates users in a connection enabled for the caller. The passwordless `email` connection is shared by every customer, so it is enabled for this application once, by hand (Dashboard > Authentication > Passwordless > Email > Applications).
 
 - At least one MFA factor enabled on the tenant (Security > Multi-factor Auth), for the MFA Action (`require_mfa = false` otherwise).
 
@@ -82,7 +99,7 @@ Copy `customers/acme.tfvars` to `customers/<slug>.tfvars` and set:
 
 - `customer`: slug, name, logo and colors (the SPA theme, and the default branding of the organizations);
 - `organizations`: name, display name and optional logo / colors of each organization;
-- `test_users`: alias (email through `test_users_email_template`), name, memberships (`organization = [roles]`) and app_metadata;
+- `test_users`: alias (email through `test_users_email_template`), name, `organizations` (`organization = "member"` or `"admin"`), `roles` (application roles) and app_metadata;
 - optionally `app_name`, `roles`, `claims_namespace`, `spa_urls` / `web_app_urls` (deployed demo URLs).
 
 ## State

@@ -27,24 +27,37 @@ organizations = {
   }
 }
 
-# Emails: test_users_email_template (<alias>@example.com by default)
+# Emails: test_users_email_template (<alias>@example.com by default).
+# Two separate permission lists: organizations (organization => member or
+# admin) and roles (application roles, held directly: application access).
 test_users = {
   acme-admin = {
-    description  = "Organization admin, full access"
-    name         = "Acme Admin"
-    memberships  = { acme-france = ["admin"] }
-    app_metadata = { dae_role = "Delegated Admin - Administrator", business_role = "admin" }
+    description   = "Organization admin, application admin"
+    name          = "Acme Admin"
+    organizations = { acme-france = "admin" }
+    roles         = ["admin"]
+    app_metadata  = { dae_role = "Delegated Admin - Administrator" }
   }
   acme-customer = {
-    description  = "B2B customer persona"
-    name         = "Acme Customer"
-    memberships  = { acme-france = ["b2b_customer"] }
-    app_metadata = { business_role = "b2b_customer" }
+    description   = "Organization member, B2B customer of the application"
+    name          = "Acme Customer"
+    organizations = { acme-france = "member" }
+    roles         = ["b2b_customer"]
   }
   acme-multi = {
-    description  = "Member of two organizations"
-    name         = "Acme Multi-organization Buyer"
-    memberships  = { acme-france = ["buyer"], acme-spain = ["buyer"] }
-    app_metadata = { business_role = "buyer" }
+    description   = "Two organizations with different roles, buyer of the application"
+    name          = "Acme Multi-organization Buyer"
+    organizations = { acme-france = "member", acme-spain = "admin" }
+    roles         = ["buyer"]
+  }
+  acme-direct = {
+    description = "No organization, buyer of the application"
+    name        = "Acme Direct Buyer"
+    roles       = ["buyer"]
+  }
+  acme-no-app = {
+    description   = "Organization member without application access: denied"
+    name          = "Acme No Application"
+    organizations = { acme-spain = "member" }
   }
 }

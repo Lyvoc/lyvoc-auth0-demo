@@ -71,33 +71,35 @@ applications = {
 # prospect's real addresses (passwordless codes and MFA emails are sent to them)
 test_users = {
   fluidra-admin = {
-    description  = "Fluidra admin, full access (DAE administrator)"
-    name         = "Fluidra Admin"
-    memberships  = { fluidra-es = ["admin"] }
-    app_metadata = { dae_role = "Delegated Admin - Administrator", business_role = "admin" }
+    description   = "Fluidra admin, full access (DAE administrator)"
+    name          = "Fluidra Admin"
+    organizations = { fluidra-es = "admin" }
+    roles         = ["admin"]
+    app_metadata  = { dae_role = "Delegated Admin - Administrator" }
   }
   fluidra-customer = {
-    description  = "B2B customer persona"
-    name         = "Fluidra Customer"
-    memberships  = { fluidra-es = ["b2b_customer"] }
-    app_metadata = { business_role = "b2b_customer" }
+    description   = "B2B customer persona"
+    name          = "Fluidra Customer"
+    organizations = { fluidra-es = "member" }
+    roles         = ["b2b_customer"]
   }
   fluidra-multi = {
-    description  = "Buyer of the three brands"
-    name         = "Multi-brand Buyer"
-    memberships  = { fluidra-es = ["buyer"], grepool-es = ["buyer"], astralpool-es = ["buyer"] }
-    app_metadata = { business_role = "buyer" }
+    description   = "Buyer of the three brands"
+    name          = "Multi-brand Buyer"
+    organizations = { fluidra-es = "member", grepool-es = "member", astralpool-es = "member" }
+    roles         = ["buyer"]
   }
   grepool-buyer = {
-    description  = "Single-brand buyer"
-    name         = "Grepool Buyer"
-    memberships  = { grepool-es = ["buyer"] }
-    app_metadata = { business_role = "buyer" }
+    description   = "Single-brand buyer"
+    name          = "Grepool Buyer"
+    organizations = { grepool-es = "member" }
+    roles         = ["buyer"]
   }
   grepool-admin = {
-    description  = "Grepool admin, scoped DAE administrator"
-    name         = "Grepool Admin"
-    memberships  = { grepool-es = ["admin"] }
-    app_metadata = { dae_role = "Delegated Admin - Administrator", business_role = "admin" }
+    description   = "Grepool admin, scoped DAE administrator"
+    name          = "Grepool Admin"
+    organizations = { grepool-es = "admin" }
+    roles         = ["admin"]
+    app_metadata  = { dae_role = "Delegated Admin - Administrator" }
   }
 }

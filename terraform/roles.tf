@@ -1,5 +1,6 @@
-# Business roles, named "<application>:<role>" like the roles the Admin UI
-# manages, so the Admin UI shows them under the demo application
+# Application roles, named "<application>:<role>" like the roles the Admin UI
+# manages, so the Admin UI shows them under the demo application. Held
+# directly by the users: they give access to the application.
 resource "auth0_role" "app" {
   for_each = var.roles
 
@@ -20,6 +21,31 @@ resource "auth0_role_permissions" "app" {
       resource_server_identifier = auth0_resource_server.api.identifier
     }
   }
+
+  depends_on = [auth0_resource_server_scopes.api]
+}
+
+# Organization roles (member, admin): the Admin UI's tenant-wide roles, shared
+# by every customer, so only looked up. This demo adds its API's permissions to
+# them one by one (auth0_role_permission, singular: other customers' remain).
+data "auth0_role" "organization" {
+  for_each = var.organization_roles
+
+  name             = each.key
+  skip_users       = true
+  skip_permissions = true
+}
+
+resource "auth0_role_permission" "organization" {
+  for_each = {
+    for p in flatten([
+      for role, permissions in var.organization_roles : [for permission in permissions : { role = role, permission = permission }]
+    ]) : "${p.role}/${p.permission}" => p
+  }
+
+  role_id                    = data.auth0_role.organization[each.value.role].id
+  resource_server_identifier = auth0_resource_server.api.identifier
+  permission                 = each.value.permission
 
   depends_on = [auth0_resource_server_scopes.api]
 }

@@ -92,7 +92,7 @@ const useTestPlan = (): TestStep[] => {
     steps.push({
       title: `Login through an organization: ${org.displayName}`,
       where: `Branded login page of ${org.name}`,
-      account: testUsers.find((user) => memberOf(user, org.name))?.email,
+      account: testUsers.find((user) => memberOf(user, org.name) && user.roles.length > 0)?.email,
       action: {
         label: `Log In to ${org.displayName}`,
         run: () => loginWithRedirect({ authorizationParams: { organization: org.id, redirect_uri: redirectUri, prompt: "login" } }),
@@ -104,9 +104,36 @@ const useTestPlan = (): TestStep[] => {
   if (multiOrgUser) {
     steps.push({
       title: "One user, several organizations",
-      where: `Log in to ${multiOrgUser.memberships.map((m) => m.organization).join(", ")} in turn: roles and branding change with the organization`,
+      where: `Log in to ${multiOrgUser.memberships.map((m) => `${m.organization} (${m.role})`).join(", ")} in turn: the organization role and branding change, the application roles stay`,
       account: multiOrgUser.email,
       action: { label: "Open", run: () => navigate("/organization") },
+    });
+  }
+
+  const directUser = testUsers.find((user) => user.memberships.length === 0 && user.roles.length > 0);
+  if (directUser) {
+    steps.push({
+      title: "Application access without organization",
+      where: "Log in without organization: allowed. Through an organization: denied (not a member)",
+      account: directUser.email,
+      action: {
+        label: "Log In",
+        run: () => loginWithRedirect({ authorizationParams: { connection: connections.database, redirect_uri: redirectUri, prompt: "login" } }),
+      },
+    });
+  }
+
+  const noAppUser = testUsers.find((user) => user.memberships.length > 0 && user.roles.length === 0);
+  if (noAppUser) {
+    const org = organizations.find((o) => memberOf(noAppUser, o.name));
+    steps.push({
+      title: "Organization member without application access",
+      where: `Log in to ${org?.displayName || "the organization"}: denied, membership alone gives no application access`,
+      account: noAppUser.email,
+      action: org && {
+        label: `Log In to ${org.displayName}`,
+        run: () => loginWithRedirect({ authorizationParams: { organization: org.id, redirect_uri: redirectUri, prompt: "login" } }),
+      },
     });
   }
 
@@ -194,7 +221,8 @@ const Welcome = () => {
                 <code style={monoStyle}>{user.email}</code>
               </div>
               <div style={{ color: "#a0aec0", fontSize: 13, marginTop: 6 }}>
-                {user.memberships.map((m) => `${m.organization}: ${m.roles.join(", ")}`).join(" · ") || "No organization"}
+                Application: {user.roles.join(", ") || "no access"} · Organizations:{" "}
+                {user.memberships.map((m) => `${m.organization} (${m.role})`).join(", ") || "none"}
                 {user.daeRole && ` · DAE: ${user.daeRole}`}
               </div>
             </div>
