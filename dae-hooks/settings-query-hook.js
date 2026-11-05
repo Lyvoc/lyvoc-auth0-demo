@@ -107,8 +107,8 @@ function (ctx, callback) {
 
       callback(null, {
         connections: [USERS_CONNECTION],
+        // No title: the extension's own ("DAE Demo")
         dict: {
-          title: 'User management',
           memberships: 'Organization',
           menuName: admin.name
         },
