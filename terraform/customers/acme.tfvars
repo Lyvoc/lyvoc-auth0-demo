@@ -27,7 +27,8 @@ organizations = {
   }
 }
 
-# Emails: test_users_email_template (<alias>@example.com by default).
+# Emails: <alias>@example.com (receives nothing), or the mailbox of
+# test_users_email_template for the accounts with receives_emails.
 # Two separate permission lists: organizations (organization => member or
 # admin) and roles (application roles, held directly: application access).
 test_users = {
@@ -51,9 +52,11 @@ test_users = {
     roles         = ["buyer"]
   }
   acme-direct = {
-    description = "No organization, buyer of the application"
+    description = "No organization, buyer of the application, passwordless login (code by email)"
     name        = "Acme Direct Buyer"
     roles       = ["buyer"]
+    # Real mailbox: receives the passwordless codes
+    receives_emails = true
   }
   acme-no-app = {
     description   = "Organization member without application access: denied"

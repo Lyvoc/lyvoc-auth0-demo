@@ -30,9 +30,11 @@ locals {
   https_spa_urls = [for url in var.spa_urls : url if startswith(url, "https://")]
   https_web_urls = [for url in var.web_app_urls : url if startswith(url, "https://")]
 
+  # Generic addresses (example.com: reserved, receives nothing), except the
+  # accounts that receive emails (passwordless codes): a real mailbox
   test_user_emails = {
-    for alias in keys(var.test_users) :
-    alias => var.test_users_email_template != "" ? format(var.test_users_email_template, alias) : "${alias}@example.com"
+    for alias, user in var.test_users :
+    alias => user.receives_emails && var.test_users_email_template != "" ? format(var.test_users_email_template, alias) : "${alias}@example.com"
   }
 
   # One entry per (user, organization), with the organization role

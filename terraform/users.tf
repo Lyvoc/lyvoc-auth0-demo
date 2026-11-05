@@ -30,8 +30,9 @@ locals {
     }
   }
 
-  # Test accounts that can also log in with a passwordless code
-  passwordless_test_users = var.enable_passwordless_email ? var.test_users : {}
+  # Test accounts that can also log in with a passwordless code: the ones with
+  # a real mailbox
+  passwordless_test_users = var.enable_passwordless_email ? { for alias, user in var.test_users : alias => user if user.receives_emails } : {}
 }
 
 # An account cannot move to another database: changing the users database
@@ -98,14 +99,31 @@ resource "auth0_organization_member_roles" "test" {
 resource "terraform_data" "passwordless_link" {
   for_each = local.passwordless_test_users
 
-  triggers_replace = [auth0_user.test[each.key].id, local.test_user_emails[each.key]]
+  input = {
+    primary_user_id = auth0_user.test[each.key].id
+    email           = local.test_user_emails[each.key]
+    connection      = data.auth0_connection.email[0].name
+  }
 
   provisioner "local-exec" {
-    command = "python3 ${path.module}/scripts/link-passwordless.py"
+    command = "python3 ${path.module}/scripts/link-passwordless.py link"
     environment = {
-      PRIMARY_USER_ID = auth0_user.test[each.key].id
-      EMAIL           = local.test_user_emails[each.key]
-      CONNECTION      = data.auth0_connection.email[0].name
+      PRIMARY_USER_ID = self.input.primary_user_id
+      EMAIL           = self.input.email
+      CONNECTION      = self.input.connection
+    }
+  }
+
+  # Removed (no mailbox anymore, account recreated): the passwordless identity
+  # is unlinked and deleted, so the code login stops
+  provisioner "local-exec" {
+    when    = destroy
+    command = "python3 ${path.module}/scripts/link-passwordless.py unlink"
+    environment = {
+      # Fallback: links recorded before input existed (triggers_replace)
+      PRIMARY_USER_ID = try(self.input.primary_user_id, self.triggers_replace[0], "")
+      EMAIL           = try(self.input.email, self.triggers_replace[1], "")
+      CONNECTION      = try(self.input.connection, "email")
     }
   }
 }

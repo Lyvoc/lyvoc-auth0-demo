@@ -31,6 +31,8 @@ export interface DemoTestUser {
   memberships: { organization: string; role: string }[];
   roles: string[];
   daeRole: string;
+  // Real mailbox: the account also logs in with a code by email
+  receivesEmails: boolean;
 }
 
 export interface DemoConfig {

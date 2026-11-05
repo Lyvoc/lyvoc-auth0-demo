@@ -53,6 +53,8 @@ output "demo_config" {
         memberships = [for org, role in user.organizations : { organization = org, role = role }]
         roles       = user.roles
         daeRole     = lookup(user.app_metadata, "dae_role", "")
+        # Real mailbox: passwordless login
+        receivesEmails = user.receives_emails
       }
     ]
     testUsersPassword = nonsensitive(local.test_users_password)

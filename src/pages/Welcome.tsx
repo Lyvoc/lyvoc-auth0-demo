@@ -70,7 +70,8 @@ const useTestPlan = (): TestStep[] => {
     steps.push({
       title: "Passwordless login (code by email)",
       where: "Universal Login, passwordless email connection, without organization",
-      note: "Use a mailbox you can read: the code is sent by email. Not offered in the organizations: a code login is a separate user, not a member.",
+      account: testUsers.find((user) => user.receivesEmails)?.email,
+      note: "The code is sent to this account's mailbox. The other test accounts have generic addresses (example.com): no email, password login only.",
       action: {
         label: "Log In with a code",
         run: () => loginWithRedirect({ authorizationParams: { connection: connections.passwordless!, redirect_uri: redirectUri } }),

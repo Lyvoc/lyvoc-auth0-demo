@@ -155,13 +155,16 @@ variable "organization_roles" {
 }
 
 variable "test_users" {
-  description = "Test accounts (key = alias, see test_users_email_template). Organizations and applications are two separate permission lists: organizations = organization name => organization role (member or admin); roles = roles of the demo application, held directly (application access)."
+  description = "Test accounts (key = alias). Generic address <alias>@example.com, or a real mailbox (test_users_email_template) when receives_emails. Organizations and applications are two separate permission lists: organizations = organization name => organization role (member or admin); roles = roles of the demo application, held directly (application access)."
   type = map(object({
     name          = string
     description   = optional(string, "")
     organizations = optional(map(string), {})
     roles         = optional(list(string), [])
     app_metadata  = optional(map(string), {})
+    # Real mailbox (test_users_email_template) and passwordless login: for
+    # the accounts that receive a code by email. Others: <alias>@example.com
+    receives_emails = optional(bool, false)
   }))
   default = {}
 

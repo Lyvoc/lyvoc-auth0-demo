@@ -12,7 +12,7 @@ Creates, on a shared Auth0 demo tenant, everything one customer's demo needs, br
 | Organizations | from `organizations` | Logo and colors per organization (login page branding) |
 | Application roles | `<app_name>:<role>` | Admin UI naming convention, with their API permissions. Held directly: application access |
 | Organization roles | `member`, `admin` (existing) | The Admin UI's tenant-wide roles: looked up, this demo adds its API permissions to them |
-| Test users | from `test_users` | Application roles and organization memberships (two separate lists), one shared password, `app_metadata` role cache read by the Admin UI (reset at every apply), passwordless identity linked to the account (one account, two ways to log in: `scripts/link-passwordless.py`) |
+| Test users | from `test_users` | Application roles and organization memberships (two separate lists), one shared password, `app_metadata` role cache read by the Admin UI (reset at every apply), generic `<alias>@example.com` addresses, except the accounts with `receives_emails`: a real mailbox and a passwordless identity linked to the account (one account, two ways to log in: `scripts/link-passwordless.py`) |
 | Actions (post-login) | `<Customer> - Demo access`, `<Customer> - Demo MFA` | Only run for the demo apps |
 | DAE hooks M2M | `<Customer> - DAE hooks` | Management API access for the Delegated Administration hooks |
 
@@ -47,7 +47,7 @@ On an organization login Auth0 only puts the organization's roles in the token: 
   export AUTH0_DOMAIN=<tenant>.eu.auth0.com
   export AUTH0_CLIENT_ID=<client id>
   export AUTH0_CLIENT_SECRET=<client secret>
-  # Mailbox receiving the test accounts' emails (passwordless and MFA codes), %s = account alias
+  # Mailbox of the test accounts with receives_emails (passwordless codes), %s = account alias
   export TF_VAR_test_users_email_template="firstname.lastname+%s@lyvoc.com"
   # Password of all the test accounts (generated when not set), shown on the demo site
   export TF_VAR_test_users_password="<password>"
@@ -100,7 +100,7 @@ Copy `customers/acme.tfvars` to `customers/<slug>.tfvars` and set:
 
 - `customer`: slug, name, logo and colors (the SPA theme, and the default branding of the organizations);
 - `organizations`: name, display name and optional logo / colors of each organization;
-- `test_users`: alias (email through `test_users_email_template`), name, `organizations` (`organization = "member"` or `"admin"`), `roles` (application roles) and app_metadata (`dae_role`: Delegated Administration extension role, given as a direct role);
+- `test_users`: alias (email through `test_users_email_template`), name, `organizations` (`organization = "member"` or `"admin"`), `roles` (application roles), `receives_emails` (real mailbox and passwordless login; otherwise `<alias>@example.com`) and app_metadata (`dae_role`: Delegated Administration extension role, given as a direct role);
 - optionally `app_name`, `roles`, `claims_namespace`, `spa_urls` / `web_app_urls` (deployed demo URLs).
 
 ## State
