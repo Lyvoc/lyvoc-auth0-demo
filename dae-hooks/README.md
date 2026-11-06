@@ -8,9 +8,9 @@ The DAE is Auth0's delegated user management extension, shown next to the Admin 
 | `access-hook.js` | What the admin may do on a user: only the users of their organizations; `Delegated Admin - Auditor` is read-only |
 | `memberships-query-hook.js` | The organizations offered in the Create User dialog: the admin's |
 | `settings-query-hook.js` | The forms: organization role, application role (the admin's applications), DAE role (never above the admin's own); organizations and application roles in the users list |
-| `write-hook.js` | Creation (account in the users database, membership, roles, `app_metadata` role cache) and profile changes (application and DAE roles) |
+| `write-hook.js` | Creation (account in the users database, the membership and roles left in `app_metadata.dae_pending` for the `<Customer> - DAE assignment` Action) and profile changes (application and DAE roles) |
 
-No customer-specific value: organizations and roles are looked up by name, so the hooks serve every customer of the tenant. The DAE runs the Write Hook before creating the user, so the hook creates the account itself and ends with a "User created" message (shown as an error) instead of letting the DAE create a second account.
+No customer-specific value: organizations and roles are looked up by name, so the hooks serve every customer of the tenant. The DAE runs the Write Hook before creating the user, so the hook cannot add the organization membership: the post-user-registration Action `<Customer> - DAE assignment` (Terraform, `terraform/actions/dae-assignment.js`) completes the new user a few seconds after its creation (membership, roles, `app_metadata` cache).
 
 ## Setup (once per tenant, by hand)
 

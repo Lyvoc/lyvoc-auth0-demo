@@ -113,18 +113,6 @@ function (ctx, callback) {
           menuName: admin.name
         },
         canCreateUser: organizations.length > 0 && meta.dae_role !== 'Delegated Admin - Auditor',
-        // The Write Hook ends a successful creation with an error (see there):
-        // no "Oh snap!" title nor "An error occurred while creating the user"
-        // prefix, the hook words its own messages
-        languageDictionary: {
-          errorTitle: '',
-          errors: { CREATE_USER: { default: '{message}' } }
-        },
-        // ...and shows it in green: every message of the dialogs is (CSS cannot
-        // tell them apart), the hook marks them with a check or a cross
-        css: 'data:text/css,' + encodeURIComponent(
-          '.modal .alert-danger { color: #1e6b3a; background-color: #e3f6e8; border-color: #b7e2c4; }'
-        ),
         userFields: [
           {
             property: 'app_metadata.organizations',

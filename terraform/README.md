@@ -14,6 +14,7 @@ Creates, on a shared Auth0 demo tenant, everything one customer's demo needs, br
 | Organization roles | `member`, `admin` (existing) | The Admin UI's tenant-wide roles: looked up, this demo adds its API permissions to them |
 | Test users | from `test_users` | Application roles and organization memberships (two separate lists), one shared password, `app_metadata` role cache read by the Admin UI (reset at every apply), generic `<alias>@example.com` addresses, except the accounts with `receives_emails`: a real mailbox and a passwordless identity linked to the account (one account, two ways to log in: `scripts/link-passwordless.py`) |
 | Actions (post-login) | `<Customer> - Demo access`, `<Customer> - Demo MFA` | Only run for the demo apps |
+| Action (post-user-registration) | `<Customer> - DAE assignment` | Completes the users created through the DAE (membership, roles): see `dae-hooks/README.md` |
 | DAE hooks M2M | `<Customer> - DAE hooks` | Management API access for the Delegated Administration hooks |
 
 The tenant is shared with other demos and with the Admin UI:

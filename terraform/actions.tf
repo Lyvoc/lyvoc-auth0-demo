@@ -92,3 +92,48 @@ resource "auth0_trigger_action" "mfa" {
   # Bindings of a trigger are locked while one is being changed: one at a time
   depends_on = [auth0_trigger_action.claims]
 }
+
+# Completes the users created through the Delegated Administration extension:
+# its Write Hook runs before the user exists, so it leaves the organization
+# membership and the roles in app_metadata.dae_pending (dae-hooks/write-hook.js)
+resource "auth0_action" "dae_assignment" {
+  count = var.enable_dae ? 1 : 0
+
+  name    = "${var.customer.name} - DAE assignment"
+  runtime = "node22"
+  deploy  = true
+  code    = file("${path.module}/actions/dae-assignment.js")
+
+  supported_triggers {
+    id      = "post-user-registration"
+    version = "v2"
+  }
+
+  secrets {
+    name  = "DOMAIN"
+    value = data.auth0_tenant.current.domain
+  }
+
+  secrets {
+    name  = "CLIENT_ID"
+    value = auth0_client.dae_hooks[0].client_id
+  }
+
+  secrets {
+    name  = "CLIENT_SECRET"
+    value = auth0_client_credentials.dae_hooks[0].client_secret
+  }
+
+  secrets {
+    name  = "ORGANIZATIONS"
+    value = jsonencode(keys(var.organizations))
+  }
+}
+
+resource "auth0_trigger_action" "dae_assignment" {
+  count = var.enable_dae ? 1 : 0
+
+  trigger      = "post-user-registration"
+  action_id    = auth0_action.dae_assignment[0].id
+  display_name = auth0_action.dae_assignment[0].name
+}

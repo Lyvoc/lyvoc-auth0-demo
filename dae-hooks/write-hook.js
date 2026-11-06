@@ -2,13 +2,11 @@
  * DAE Write Hook: user creation and profile changes by the delegated admin,
  * with the demo's access model (same result as the Admin UI).
  *
- * CREATE: the hook creates the account itself through the Management API, in
- * the users database: membership of the chosen organization with its
- * organization role (member, admin), the application role and the DAE role
- * held directly, then the app_metadata role cache. The DAE runs this hook
- * before creating the user, so it cannot add a membership to a user it has
- * not created yet: the hook ends with a message (shown as an error by the
- * DAE) instead of letting the DAE create a second account.
+ * CREATE: the DAE creates the user in the users database. The hook runs
+ * before the user exists, so it cannot add the organization membership: it
+ * leaves the assignment (organization, organization role, application role,
+ * DAE role) in app_metadata.dae_pending, completed by the
+ * "<Customer> - DAE assignment" Action (post-user-registration, Terraform).
  *
  * UPDATE ("Change Profile"): replaces the application role and the DAE role,
  * then rebuilds the app_metadata role cache.
@@ -158,61 +156,28 @@ function (ctx, callback) {
   var isDaeRole = function (name) { return DAE_ROLES.indexOf(name) !== -1; };
 
   if (ctx.method === 'create') {
-    // Errors shown as they are (no prefix: see the Settings Query Hook)
-    var fail = function (message) {
-      return callback(new Error('\u274C Could not create the user: ' + message));
-    };
     var organization = (ctx.payload.memberships && ctx.payload.memberships[0]) || adminOrganizations[0];
     if (adminOrganizations.indexOf(organization) === -1) {
-      return fail('you can only create users in your organizations.');
+      return callback(new Error('You can only create users in your organizations.'));
     }
     if (ORG_ROLES.indexOf(orgRole) === -1) {
-      return fail('unknown organization role ' + orgRole + '.');
+      return callback(new Error('Unknown organization role: ' + orgRole));
     }
 
-    var userId;
-    return getToken()
-      .then(function () {
-        return api('POST', '/users', {
-          connection: USERS_CONNECTION,
-          email: ctx.payload.email,
-          password: ctx.payload.password,
-          user_metadata: ctx.payload.user_metadata || {},
-          app_metadata: daeRole ? { dae_role: daeRole } : {}
-        });
-      })
-      .then(function (user) {
-        userId = user.user_id;
-        return Promise.all([
-          api('GET', '/organizations/name/' + encodeURIComponent(organization)),
-          findRole(orgRole)
-        ]);
-      })
-      .then(function (results) {
-        var org = results[0];
-        var role = results[1];
-        return api('POST', '/organizations/' + org.id + '/members', { members: [userId] }).then(function () {
-          return api('POST', '/organizations/' + org.id + '/members/' + encodeURIComponent(userId) + '/roles', { roles: [role.id] });
-        });
-      })
-      .then(function () {
-        var direct = [appRole, daeRole].filter(Boolean);
-        return Promise.all(direct.map(findRole)).then(function (roles) {
-          if (!roles.length) return;
-          return api('POST', '/users/' + encodeURIComponent(userId) + '/roles', {
-            roles: roles.map(function (role) { return role.id; })
-          });
-        });
-      })
-      .then(function () { return syncRoleMetadata(userId); })
-      .then(function () {
-        // Not an error: stops the DAE from creating a second account
-        callback(new Error(
-          '\u2705 User created: ' + ctx.payload.email + ', ' + orgRole + ' of ' + organization +
-          (appRole ? ', ' + appRole : ', no application access') + '. Close this window and refresh the list.'
-        ));
-      })
-      .catch(function (err) { fail(err.message); });
+    // Created by the DAE; the "<Customer> - DAE assignment" Action
+    // (post-user-registration) adds the membership and the roles left in
+    // dae_pending. organizations: listed by the Filter Hook right away.
+    return callback(null, {
+      email: ctx.payload.email,
+      password: ctx.payload.password,
+      connection: USERS_CONNECTION,
+      user_metadata: ctx.payload.user_metadata || {},
+      app_metadata: {
+        organizations: [organization],
+        dae_role: daeRole || undefined,
+        dae_pending: { organization: organization, org_role: orgRole, app_role: appRole, dae_role: daeRole }
+      }
+    });
   }
 
   if (ctx.method === 'update') {
