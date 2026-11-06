@@ -45,7 +45,7 @@ npm run dev       # portal: http://localhost:8080
 npm run web       # web application (single sign-on), in another terminal: http://localhost:3000
 ```
 
-The welcome page then shows the **Demo Test Plan**: every step of the demo with the account to use and a button to run it. The test accounts share one password, shown on the page.
+The welcome page then shows the **Demo Test Plan**: every step of the demo with the account to use and a button to run it. The test accounts share one password, shown on the page. The full scenarios, with what to say and the expected results: [docs/scenarios.md](docs/scenarios.md).
 
 To switch the portal to another customer: `terraform workspace select <customer>`, then `npm run config` again.
 
