@@ -7,7 +7,6 @@ import DaeExtensionPage from "./pages/DaeExtensionPage";
 import Welcome from "./pages/Welcome";
 import TokenPage from "./pages/TokenPage";
 import AdaptiveMfaPage from "./pages/AdaptiveMfaPage";
-import ActionsPage from "./pages/ActionsPage";
 import OrganizationPage from "./pages/OrganizationPage";
 import SettingsPage from "./pages/SettingsPage";
 import { OrganizationProvider } from "./context/OrganizationContext";
@@ -107,7 +106,6 @@ const AppContent = () => {
           <Route path="/" element={<Welcome />} />
           <Route path="/token" element={<TokenPage />} />
           <Route path="/adaptive-mfa" element={<AdaptiveMfaPage />} />
-          <Route path="/actions" element={<ActionsPage />} />
           <Route path="/organization" element={<OrganizationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/dae-extension" element={<DaeExtensionPage />} />

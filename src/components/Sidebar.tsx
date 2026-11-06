@@ -75,16 +75,6 @@ const Sidebar = () => {
       })}>
         Welcome
       </NavLink>
-      <NavLink to="/actions" style={({ isActive }) => ({
-        color: isActive ? "var(--primary-color)" : "var(--text-secondary)",
-        textDecoration: "none",
-        fontWeight: 600,
-        fontSize: 17,
-        marginBottom: 16,
-        display: "block",
-      })}>
-        Actions
-      </NavLink>
       {features.mfa !== "off" && (
         <NavLink to="/adaptive-mfa" style={({ isActive }) => ({
           color: isActive ? "var(--primary-color)" : "var(--text-secondary)",
