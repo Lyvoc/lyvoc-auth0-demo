@@ -65,7 +65,9 @@ if (!dae) {
   mkdirSync(DAE_HOOKS_GENERATED, { recursive: true, mode: 0o700 });
   const hooks = readdirSync(DAE_HOOKS).filter((name) => name.endsWith(".js"));
   for (const name of hooks) {
-    const source = readFileSync(`${DAE_HOOKS}/${name}`, "utf8");
+    // Without the header comment: the DAE evaluates the hook as an expression
+    // ("return <hook>"), and a comment spanning lines after "return" ends it
+    const source = readFileSync(`${DAE_HOOKS}/${name}`, "utf8").replace(/^\/\*[\s\S]*?\*\/\s*/, "");
     const hook = Object.entries(values).reduce((text, [key, value]) => text.replaceAll(key, value), source);
     writeFileSync(`${DAE_HOOKS_GENERATED}/${name}`, hook, { mode: 0o600 });
   }
