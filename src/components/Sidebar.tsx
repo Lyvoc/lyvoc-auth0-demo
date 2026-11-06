@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useTheme } from "../context/ThemeContext";
 import { OrganizationBadge } from "./OrganizationPicker";
@@ -10,7 +10,6 @@ const Sidebar = () => {
   const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
   const { theme, currentOrgBranding } = useTheme();
 
-
   const handlePasswordless = () => {
     loginWithRedirect({
       authorizationParams: {
@@ -18,29 +17,6 @@ const Sidebar = () => {
         redirect_uri: window.location.origin + "/token"
       }
     });
-  };
-
-  const handleOktaWorkforce = () => {
-    loginWithRedirect({
-      authorizationParams: {
-        connection: "lyvoc", // Okta Workforce connection name
-        redirect_uri: window.location.origin + "/token",
-        prompt: "login" // Force credential prompt even if SSO session exists
-      }
-    });
-  };
-  const handleSamlLogin = () => {
-    loginWithRedirect({
-      authorizationParams: {
-        // Use the SAML connection configured in the dashboard
-        connection: "SAML-Auth0-IDP",
-        redirect_uri: window.location.origin + "/token"
-      }
-    });
-  };
-  const navigate = useNavigate();
-  const handleIdpPortal = () => {
-    navigate("/saml-idp-initiated");
   };
 
   return (
@@ -109,17 +85,6 @@ const Sidebar = () => {
       })}>
         Actions
       </NavLink>
-      {features.tokenExchange && (
-        <NavLink to="/token-exchange" style={({ isActive }) => ({
-          color: isActive ? "var(--primary-color)" : "var(--text-secondary)",
-          textDecoration: "none",
-          fontWeight: 600,
-          fontSize: 17,
-          marginBottom: 16,
-        })}>
-          Custom Token Exchange
-        </NavLink>
-      )}
       {features.mfa !== "off" && (
         <NavLink to="/adaptive-mfa" style={({ isActive }) => ({
           color: isActive ? "var(--primary-color)" : "var(--text-secondary)",
@@ -140,31 +105,6 @@ const Sidebar = () => {
       })}>
         Token / Profile
       </NavLink>
-
-      {features.logStreams && (
-        <NavLink to="/log-streams" style={({ isActive }) => ({
-          color: isActive ? "var(--primary-color)" : "var(--text-secondary)",
-          textDecoration: "none",
-          fontWeight: 600,
-          fontSize: 17,
-          marginBottom: 16,
-        })}>
-          Log Streams
-        </NavLink>
-      )}
-
-      {features.forms && (
-        <NavLink to="/forms" style={({ isActive }) => ({
-          color: isActive ? "var(--primary-color)" : "var(--text-secondary)",
-          textDecoration: "none",
-          fontWeight: 600,
-          fontSize: 17,
-          marginBottom: 16,
-        })}>
-          Forms
-        </NavLink>
-      )}
-
 
       <NavLink to="/organization" style={({ isActive }) => ({
         color: isActive ? "var(--primary-color)" : "var(--text-secondary)",
@@ -221,25 +161,6 @@ const Sidebar = () => {
         </a>
       )}
 
-      {features.saml && (
-        <button
-          onClick={handleIdpPortal}
-          style={{
-            marginTop: 16,
-            background: "#2b6cb0",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            padding: "0.9rem 1.2rem",
-            fontWeight: 600,
-            fontSize: 16,
-            cursor: "pointer",
-            textAlign: "left",
-          }}
-        >
-          SAML IDP Initiated
-        </button>
-      )}
       {features.passwordless && (
         <button
           onClick={handlePasswordless}
@@ -257,46 +178,6 @@ const Sidebar = () => {
           }}
         >
           Passwordless Login
-        </button>
-      )}
-      {/*
-      <button
-        onClick={() => {
-          window.location.href = "https://demo-lyvoc.eu.auth0.com/auth0-delegated-admin";
-        }}
-        style={{
-          marginTop: 16,
-          background: "#38a169",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          padding: "0.9rem 1.2rem",
-          fontWeight: 600,
-          fontSize: 16,
-          cursor: "pointer",
-          textAlign: "left",
-        }}
-      >
-        DAE Admin Login
-      </button>
-      */}
-      {features.oktaWorkforce && (
-        <button
-          onClick={handleOktaWorkforce}
-          style={{
-            marginTop: 16,
-            background: "#63b3ed",
-            color: "#23263a",
-            border: "none",
-            borderRadius: 8,
-            padding: "0.9rem 1.2rem",
-            fontWeight: 600,
-            fontSize: 16,
-            cursor: "pointer",
-            textAlign: "left",
-          }}
-        >
-          Okta Workforce OIDC
         </button>
       )}
 

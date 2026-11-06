@@ -5,19 +5,14 @@ import { useAuth0 } from "@auth0/auth0-react";
 import Sidebar from "./components/Sidebar";
 import DaeExtensionPage from "./pages/DaeExtensionPage";
 import Welcome from "./pages/Welcome";
-import TokenExchange from "./pages/TokenExchange";
 import TokenPage from "./pages/TokenPage";
 import AdaptiveMfaPage from "./pages/AdaptiveMfaPage";
-import LogStreamsPage from "./pages/LogStreamsPage";
-import SAMLIdpInitiatedPage from "./pages/SAMLIdpInitiatedPage";
 import ActionsPage from "./pages/ActionsPage";
-import FormsPage from "./pages/FormsPage";
 import OrganizationPage from "./pages/OrganizationPage";
 import SettingsPage from "./pages/SettingsPage";
 import { OrganizationProvider } from "./context/OrganizationContext";
 import { useTheme } from "./context/ThemeContext";
 import { getOrgId } from "./config/organizationBranding";
-// import OrganizationPage from "./OrganizationPage";
 
 /**
  * Inner App component that has access to theme context
@@ -110,14 +105,9 @@ const AppContent = () => {
       >
         <Routes>
           <Route path="/" element={<Welcome />} />
-          <Route path="/token-exchange" element={<TokenExchange />} />
           <Route path="/token" element={<TokenPage />} />
           <Route path="/adaptive-mfa" element={<AdaptiveMfaPage />} />
-          <Route path="/log-streams" element={<LogStreamsPage />} />
-          <Route path="/saml-idp-initiated" element={<SAMLIdpInitiatedPage />} />
-          {/* <Route path="/organization" element={<OrganizationPage />} /> */}
           <Route path="/actions" element={<ActionsPage />} />
-          <Route path="/forms" element={<FormsPage />} />
           <Route path="/organization" element={<OrganizationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/dae-extension" element={<DaeExtensionPage />} />

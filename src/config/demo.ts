@@ -60,12 +60,6 @@ export interface DemoConfig {
     passwordless: boolean;
     dae: boolean;
     mfa: "step-up" | "always" | "off";
-    // Not configured by Terraform yet: pages hidden unless set
-    tokenExchange?: boolean;
-    logStreams?: boolean;
-    forms?: boolean;
-    saml?: boolean;
-    oktaWorkforce?: boolean;
   };
 }
 

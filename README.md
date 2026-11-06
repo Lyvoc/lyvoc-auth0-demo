@@ -20,8 +20,7 @@ A reusable Auth0 demo, branded for each prospect in a few minutes: a demo portal
 | `web-app/` | The web application of the single sign-on demo (Express, `express-openid-connect`), configured by `web-app/.env` (generated, git-ignored) |
 | `scripts/config.mjs` | `npm run config`: writes both configurations from Terraform's outputs |
 | [`dae-hooks/`](dae-hooks/README.md) | Hooks of the Delegated Administration extension: delegated admins manage the users of their organizations |
-| `server.js`, `workers/`, `wrangler.toml` | Backend of an earlier Custom Token Exchange demo (its page is hidden unless enabled) |
-| `docs/` | Guides of the earlier demos, to be reviewed |
+| [`docs/scenarios.md`](docs/scenarios.md) | The demo scenarios |
 
 The Admin UI is not part of this repository: it has its own repository and deployment, so the demo always uses its latest version. The portal links to it (`admin_ui_url` in the customer file).
 
