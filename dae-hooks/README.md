@@ -22,3 +22,19 @@ The extension, its "DAE App" application and its hooks are shared by the whole t
 3. Open the DAE (the portal's DAE Extension page) with an account holding `Delegated Admin - Administrator`, then **Configuration > Hooks**: paste each file of `dae-hooks/generated/` into its hook, and save.
 
 The DAE stores the hooks (with the credentials) in the extension: only Dashboard admins and DAE administrators can read them. Paste them again after the `<Customer> - DAE hooks` secret changes.
+
+## Extension version and settings
+
+Version **4.8 or later** is required: older ones read the connections' `enabled_clients` field, removed from the Management API (July 2026), and fail on the user details page ("String 'enabled_clients' does not match pattern"). On demo-lyvoc the extension is still 4.7: the upgrade to 5.0.0 fails ("Could not upgrade extension", November 2026), so the list and user creation work, the user details page does not (manage those users from the Admin UI).
+
+Settings to enter when (re)installing it (Dashboard > Extensions > Delegated Administration Dashboard), then paste the hooks again:
+
+| Setting | demo-lyvoc |
+|---|---|
+| Extension client id | Client ID of "DAE App" |
+| Title | `DAE Demo` |
+| Custom css, Favicon path, Auth0 custom domain | empty |
+| User search engine | `v3` |
+| Federated logout | `No` |
+| Public wt url | `https://<tenant>.<region>.webtask.run/auth0-delegated-admin` |
+| Isolated domain | `true` |
