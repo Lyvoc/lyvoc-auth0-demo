@@ -130,11 +130,14 @@ function (ctx, callback) {
             edit: false,
             create: false
           },
+          // One InputSelectCombo only: its options load through react-select's
+          // Async cache, shared by every InputSelectCombo of the form (a second
+          // one would show the first one's options). The others: InputCombo
           {
             property: 'app_metadata.org_role',
             label: 'Organization role',
             display: false,
-            create: { type: 'select', component: 'InputSelectCombo', options: orgRoleOptions, required: true },
+            create: { type: 'select', component: 'InputCombo', options: orgRoleOptions, required: true },
             edit: false
           },
           {
@@ -147,8 +150,8 @@ function (ctx, callback) {
           {
             property: 'app_metadata.dae_role',
             label: 'DAE role',
-            create: { type: 'select', component: 'InputSelectCombo', options: daeRoleOptions, required: false },
-            edit: { type: 'select', component: 'InputSelectCombo', options: daeRoleOptions, required: false }
+            create: { type: 'select', component: 'InputCombo', options: daeRoleOptions, required: false },
+            edit: { type: 'select', component: 'InputCombo', options: daeRoleOptions, required: false }
           }
         ]
       });
