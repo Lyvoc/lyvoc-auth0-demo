@@ -158,12 +158,16 @@ function (ctx, callback) {
   var isDaeRole = function (name) { return DAE_ROLES.indexOf(name) !== -1; };
 
   if (ctx.method === 'create') {
+    // Errors shown as they are (no prefix: see the Settings Query Hook)
+    var fail = function (message) {
+      return callback(new Error('Could not create the user: ' + message));
+    };
     var organization = (ctx.payload.memberships && ctx.payload.memberships[0]) || adminOrganizations[0];
     if (adminOrganizations.indexOf(organization) === -1) {
-      return callback(new Error('You can only create users in your organizations.'));
+      return fail('you can only create users in your organizations.');
     }
     if (ORG_ROLES.indexOf(orgRole) === -1) {
-      return callback(new Error('Unknown organization role: ' + orgRole));
+      return fail('unknown organization role ' + orgRole + '.');
     }
 
     var userId;
@@ -205,10 +209,10 @@ function (ctx, callback) {
         // Not an error: stops the DAE from creating a second account
         callback(new Error(
           'User created: ' + ctx.payload.email + ', ' + orgRole + ' of ' + organization +
-          (appRole ? ', ' + appRole : ', no application access') + '. Refresh the list to see it.'
+          (appRole ? ', ' + appRole : ', no application access') + '. Close this window and refresh the list.'
         ));
       })
-      .catch(function (err) { callback(err); });
+      .catch(function (err) { fail(err.message); });
   }
 
   if (ctx.method === 'update') {

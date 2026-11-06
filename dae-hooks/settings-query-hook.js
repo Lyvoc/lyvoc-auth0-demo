@@ -113,6 +113,13 @@ function (ctx, callback) {
           menuName: admin.name
         },
         canCreateUser: organizations.length > 0 && meta.dae_role !== 'Delegated Admin - Auditor',
+        // The Write Hook ends a successful creation with an error (see there):
+        // no "Oh snap!" title nor "An error occurred while creating the user"
+        // prefix, the hook words its own messages
+        languageDictionary: {
+          errorTitle: '',
+          errors: { CREATE_USER: { default: '{message}' } }
+        },
         userFields: [
           {
             property: 'app_metadata.organizations',
