@@ -25,9 +25,9 @@ The DAE stores the hooks (with the credentials) in the extension: only Dashboard
 
 ## Extension version and settings
 
-Version **4.8 or later** is required: older ones read the connections' `enabled_clients` field, removed from the Management API (July 2026), and fail on the user details page ("String 'enabled_clients' does not match pattern"). On demo-lyvoc the extension is still 4.7: the upgrade to 5.0.0 fails ("Could not upgrade extension", November 2026), so the list and user creation work, the user details page does not (manage those users from the Admin UI).
+Version **4.8 or later** is required: older ones read the connections' `enabled_clients` field, removed from the Management API (July 2026), and fail on the user details page ("String 'enabled_clients' does not match pattern"). On demo-lyvoc the upgrade from 4.7 failed ("Could not upgrade extension"): the extension was uninstalled and version 5.0 installed instead, which works.
 
-Settings to enter when (re)installing it (Dashboard > Extensions > Delegated Administration Dashboard), then paste the hooks again:
+Settings to enter when (re)installing it (Dashboard > Extensions > Delegated Administration Dashboard), then paste the hooks again (uninstalling deletes them):
 
 | Setting | demo-lyvoc |
 |---|---|
