@@ -120,6 +120,11 @@ function (ctx, callback) {
           errorTitle: '',
           errors: { CREATE_USER: { default: '{message}' } }
         },
+        // ...and shows it in green: every message of the dialogs is (CSS cannot
+        // tell them apart), the hook marks them with a check or a cross
+        css: 'data:text/css,' + encodeURIComponent(
+          '.modal .alert-danger { color: #1e6b3a; background-color: #e3f6e8; border-color: #b7e2c4; }'
+        ),
         userFields: [
           {
             property: 'app_metadata.organizations',

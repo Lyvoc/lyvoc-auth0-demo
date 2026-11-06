@@ -160,7 +160,7 @@ function (ctx, callback) {
   if (ctx.method === 'create') {
     // Errors shown as they are (no prefix: see the Settings Query Hook)
     var fail = function (message) {
-      return callback(new Error('Could not create the user: ' + message));
+      return callback(new Error('\u274C Could not create the user: ' + message));
     };
     var organization = (ctx.payload.memberships && ctx.payload.memberships[0]) || adminOrganizations[0];
     if (adminOrganizations.indexOf(organization) === -1) {
@@ -208,7 +208,7 @@ function (ctx, callback) {
       .then(function () {
         // Not an error: stops the DAE from creating a second account
         callback(new Error(
-          'User created: ' + ctx.payload.email + ', ' + orgRole + ' of ' + organization +
+          '\u2705 User created: ' + ctx.payload.email + ', ' + orgRole + ' of ' + organization +
           (appRole ? ', ' + appRole : ', no application access') + '. Close this window and refresh the list.'
         ));
       })
