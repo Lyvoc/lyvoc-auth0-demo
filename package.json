@@ -1,44 +1,12 @@
 {
-  "name": "auth0-react-app",
-  "version": "1.0.0",
+  "name": "lyvoc-auth0-demo",
   "private": true,
+  "description": "Lyvoc Auth0 demo platform: portal (spa/), web application (web-app/), tenant configuration (terraform/)",
   "scripts": {
-    "dev": "vite",
+    "setup": "npm --prefix spa install && npm --prefix web-app install",
     "config": "node scripts/config.mjs",
-    "web": "npm --prefix web-app start",
-    "build": "vite build",
-    "serve": "vite preview"
-  },
-  "dependencies": {
-    "@auth0/auth0-react": "^2.8.0",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.0.0"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^5.1.0",
-    "typescript": "^4.0.0",
-    "vite": "^7.1.12"
-  },
-  "eslintConfig": {
-    "extends": [
-      "plugin:react/recommended",
-      "plugin:@typescript-eslint/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "react",
-      "@typescript-eslint"
-    ],
-    "rules": {
-      "react/react-in-jsx-scope": "off"
-    }
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not op_mini all"
-  ]
+    "dev": "npm --prefix spa run dev",
+    "build": "npm --prefix spa run build",
+    "web": "npm --prefix web-app start"
+  }
 }

@@ -47,7 +47,7 @@ const buttonStyle: React.CSSProperties = {
 const memberOf = (user: DemoTestUser, org: string) => user.memberships.some((m) => m.organization === org);
 
 /**
- * Demo test plan, built from the demo configuration (src/config/demo.json)
+ * Demo test plan, built from the demo configuration (spa/src/config/demo.json)
  */
 const useTestPlan = (): TestStep[] => {
   const { loginWithRedirect } = useAuth0();
@@ -223,7 +223,7 @@ const Welcome = () => {
         <div style={{ textAlign: "left" }}>
           <h2 style={{ color: "#ed8936", marginBottom: 12 }}>Test Accounts</h2>
           {demoConfig.testUsers.length === 0 && (
-            <p style={{ color: "#a0aec0" }}>No test account in the demo configuration (src/config/demo.json).</p>
+            <p style={{ color: "#a0aec0" }}>No test account in the demo configuration (spa/src/config/demo.json).</p>
           )}
           {demoConfig.testUsers.map((user) => (
             <div key={user.email} style={{ background: "#1a1e27", borderRadius: 8, padding: "0.75rem 1rem", marginBottom: 12 }}>

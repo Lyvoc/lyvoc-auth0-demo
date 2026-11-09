@@ -46,7 +46,7 @@ crash.log
 terraform/.env*
 
 # Demo configuration generated from Terraform (npm run config)
-src/config/demo.json
+spa/src/config/demo.json
 
 # Delegated Administration hooks with their credentials (npm run config)
 dae-hooks/generated/

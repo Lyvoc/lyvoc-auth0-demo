@@ -16,9 +16,10 @@ A reusable Auth0 demo, branded for each prospect in a few minutes: a demo portal
 | Path | Content |
 |---|---|
 | [`terraform/`](terraform/README.md) | Configuration of the demo tenant, one workspace and one file (`customers/<customer>.tfvars`) per customer |
-| `src/` | The demo portal (Vite, React, Auth0 SPA SDK), configured by `src/config/demo.json` (generated, git-ignored) |
+| `spa/` | The demo portal, a single-page application (Vite, React, Auth0 SPA SDK), configured by `spa/src/config/demo.json` (generated, git-ignored) |
 | `web-app/` | The web application of the single sign-on demo (Express, `express-openid-connect`), configured by `web-app/.env` (generated, git-ignored) |
 | `scripts/config.mjs` | `npm run config`: writes both configurations from Terraform's outputs |
+| `package.json` | Repository-level commands only (`npm run setup`, `config`, `dev`, `web`, `build`); each application has its own dependencies |
 | [`dae-hooks/`](dae-hooks/README.md) | Hooks of the Delegated Administration extension: delegated admins manage the users of their organizations |
 | [`docs/scenarios.md`](docs/scenarios.md) | The demo scenarios |
 
@@ -38,8 +39,8 @@ terraform plan -var-file=customers/<prospect>.tfvars -out=<prospect>.tfplan
 terraform apply <prospect>.tfplan
 
 cd ..
-npm install && npm --prefix web-app install
-npm run config    # writes src/config/demo.json and web-app/.env from Terraform's outputs
+npm run setup     # installs the portal (spa/) and the web application (web-app/)
+npm run config    # writes spa/src/config/demo.json and web-app/.env from Terraform's outputs
 npm run dev       # portal: http://localhost:8080
 npm run web       # web application (single sign-on), in another terminal: http://localhost:3000
 ```

@@ -1,6 +1,6 @@
 /**
  * Demo configuration, generated from the Terraform outputs of the customer
- * (npm run config: terraform output -json demo_config > src/config/demo.json).
+ * (npm run config: terraform output -json demo_config > spa/src/config/demo.json).
  * Without demo.json, a neutral configuration is used and the Auth0 values come
  * from the VITE_AUTH0_* environment variables only.
  */

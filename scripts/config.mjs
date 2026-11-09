@@ -1,6 +1,6 @@
 // Writes the demo configuration from Terraform's outputs (terraform/, current
 // workspace = current customer):
-// - src/config/demo.json: the portal's configuration (no secret but the test
+// - spa/src/config/demo.json: the portal's configuration (no secret but the test
 //   accounts' password, shown on the portal)
 // - web-app/.env: the web application's settings, with its client secret
 // - dae-hooks/generated/: the Delegated Administration extension hooks to
@@ -10,7 +10,7 @@ import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 
-const PORTAL_CONFIG = "src/config/demo.json";
+const PORTAL_CONFIG = "spa/src/config/demo.json";
 const WEB_APP_ENV = "web-app/.env";
 const DAE_HOOKS = "dae-hooks";
 const DAE_HOOKS_GENERATED = "dae-hooks/generated";

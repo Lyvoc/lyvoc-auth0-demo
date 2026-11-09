@@ -77,16 +77,16 @@ terraform apply acme.tfplan
 Configuration of the demo app (organizations, roles, applications, test accounts and their password, Auth0 client, Admin UI and DAE links; no other secret), from the repository root:
 
 ```bash
-npm run config    # terraform output -json demo_config > src/config/demo.json (git-ignored)
+npm run config    # terraform output -json demo_config > spa/src/config/demo.json (git-ignored)
 npm run dev
 ```
 
-Without `src/config/demo.json`, the app falls back to a neutral configuration and the `VITE_AUTH0_*` variables of `.env`, which also override the generated values when set.
+Without `spa/src/config/demo.json`, the app falls back to a neutral configuration and the `VITE_AUTH0_*` variables of `spa/.env`, which also override the generated values when set.
 
 Other outputs:
 
 ```bash
-terraform output spa_env                    # .env of the demo SPA
+terraform output spa_env                    # spa/.env of the demo SPA
 terraform output organizations              # organization IDs
 terraform output dae                        # values for the DAE hooks
 terraform output -raw test_users_password   # password of the test accounts
@@ -122,8 +122,8 @@ Changing `app_name` renames the roles: Terraform recreates and reassigns them fo
 The portal follows the customer without code change:
 
 1. `terraform output -json demo_config` gathers what the portal needs: customer name, logo and colors, Auth0 client and audience, claims namespace, connections, organizations (IDs and branding), roles, test accounts and their password, Admin UI and DAE URLs, enabled features.
-2. `npm run config` writes it to `src/config/demo.json` (git-ignored, one customer at a time).
-3. The portal reads it (`src/config/demo.ts`): theme (`src/context/ThemeContext.tsx`), organizations (`src/config/organizationBranding.ts`), the welcome page's Demo Test Plan and test accounts, the Admin UI and DAE links. Without the file, the portal falls back to a neutral configuration and the `VITE_AUTH0_*` variables of `.env`.
+2. `npm run config` writes it to `spa/src/config/demo.json` (git-ignored, one customer at a time).
+3. The portal reads it (`spa/src/config/demo.ts`): theme (`spa/src/context/ThemeContext.tsx`), organizations (`spa/src/config/organizationBranding.ts`), the welcome page's Demo Test Plan and test accounts, the Admin UI and DAE links. Without the file, the portal falls back to a neutral configuration and the `VITE_AUTH0_*` variables of `spa/.env`.
 
 ## State
 

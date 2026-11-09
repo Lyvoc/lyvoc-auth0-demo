@@ -1,11 +1,11 @@
 # Values for the demo app and the DAE hooks
 
 # Configuration of the demo app (no secret but the test accounts' password,
-# shown on the demo site): written to src/config/demo.json by `npm run config`
+# shown on the demo site): written to spa/src/config/demo.json by `npm run config`
 # (scripts/config.mjs, at the repository root), with the web application's
 # settings (web-app/.env)
 output "demo_config" {
-  description = "Configuration of the demo app (src/config/demo.json)."
+  description = "Configuration of the demo app (spa/src/config/demo.json)."
   value = {
     customer = {
       name                = var.customer.name
