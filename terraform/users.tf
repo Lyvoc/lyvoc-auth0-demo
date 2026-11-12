@@ -30,6 +30,12 @@ locals {
     }
   }
 
+  # Interface language of each account: its own, else test_users_locale
+  # ("" = none)
+  test_users_locale = {
+    for alias, user in var.test_users : alias => user.locale != null ? user.locale : var.test_users_locale
+  }
+
   # Test accounts that can also log in with a passwordless code: the ones with
   # a real mailbox
   passwordless_test_users = var.enable_passwordless_email ? { for alias, user in var.test_users : alias => user if user.receives_emails } : {}
@@ -52,7 +58,11 @@ resource "auth0_user" "test" {
   password = local.test_users_password
 
   # Reset at every apply with the memberships, like the password
-  app_metadata = jsonencode(merge(each.value.app_metadata, local.test_users_role_metadata[each.key]))
+  app_metadata = jsonencode(merge(
+    each.value.app_metadata,
+    local.test_users_locale[each.key] != "" ? { locale = local.test_users_locale[each.key] } : {},
+    local.test_users_role_metadata[each.key],
+  ))
 
   lifecycle {
     ignore_changes       = [user_metadata]

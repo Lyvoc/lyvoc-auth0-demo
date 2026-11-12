@@ -162,6 +162,9 @@ variable "test_users" {
     organizations = optional(map(string), {})
     roles         = optional(list(string), [])
     app_metadata  = optional(map(string), {})
+    # Interface language (app_metadata.locale): "en" or "fr", the languages
+    # of the Admin UI. Default: test_users_locale
+    locale = optional(string)
     # Real mailbox (test_users_email_template) and passwordless login: for
     # the accounts that receive a code by email. Others: <alias>@example.com
     receives_emails = optional(bool, false)
@@ -183,6 +186,24 @@ variable "test_users" {
       for user in values(var.test_users) : contains(concat([""], local.dae_role_names), lookup(user.app_metadata, "dae_role", ""))
     ])
     error_message = "test_users: app_metadata.dae_role must be a role of the Delegated Administration extension (\"Delegated Admin - Administrator\", \"- Operator\", \"- Auditor\" or \"- User\")."
+  }
+
+  validation {
+    condition = alltrue([
+      for user in values(var.test_users) : user.locale == null || contains(["en", "fr"], coalesce(user.locale, "-"))
+    ])
+    error_message = "test_users: locale must be \"en\" or \"fr\" (the languages of the Admin UI)."
+  }
+}
+
+variable "test_users_locale" {
+  description = "Interface language of the test accounts without their own locale (app_metadata.locale, read by the Admin UI and the applications): \"en\", \"fr\", or \"\" for none. Reset at every apply, like the rest of app_metadata."
+  type        = string
+  default     = "en"
+
+  validation {
+    condition     = contains(["", "en", "fr"], var.test_users_locale)
+    error_message = "test_users_locale: \"en\", \"fr\" or \"\" (none)."
   }
 }
 

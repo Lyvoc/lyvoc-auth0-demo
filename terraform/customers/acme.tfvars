@@ -50,6 +50,8 @@ test_users = {
     name          = "Acme Multi-organization Buyer"
     organizations = { acme-france = "member", acme-spain = "admin" }
     roles         = ["buyer"]
+    # Interface language (the others: test_users_locale, "en" by default)
+    locale = "fr"
   }
   acme-direct = {
     description = "No organization, buyer of the application, passwordless login (code by email)"

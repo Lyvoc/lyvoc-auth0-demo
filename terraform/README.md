@@ -12,7 +12,7 @@ Creates, on a shared Auth0 demo tenant, everything one customer's demo needs, br
 | Organizations | from `organizations` | Logo and colors per organization (login page branding) |
 | Application roles | `<app_name>:<role>` | Admin UI naming convention, with their API permissions. Held directly: application access |
 | Organization roles | `member`, `admin` (existing) | The Admin UI's tenant-wide roles: looked up, this demo adds its API permissions to them |
-| Test users | from `test_users` | Application roles and organization memberships (two separate lists), one shared password, `app_metadata` role cache read by the Admin UI (reset at every apply), generic `<alias>@example.com` addresses, except the accounts with `receives_emails`: a real mailbox and a passwordless identity linked to the account (one account, two ways to log in: `scripts/link-passwordless.py`) |
+| Test users | from `test_users` | Application roles and organization memberships (two separate lists), one shared password, `app_metadata` role cache read by the Admin UI and interface language (`locale`), reset at every apply, generic `<alias>@example.com` addresses, except the accounts with `receives_emails`: a real mailbox and a passwordless identity linked to the account (one account, two ways to log in: `scripts/link-passwordless.py`) |
 | Actions (post-login) | `<Customer> - Demo access`, `<Customer> - Demo MFA` | Only run for the demo apps |
 | Action (post-user-registration) | `<Customer> - DAE assignment` | Completes the users created through the DAE (membership, roles): see `dae-hooks/README.md` |
 | DAE hooks M2M | `<Customer> - DAE hooks` | Management API access for the Delegated Administration hooks |
@@ -101,7 +101,7 @@ Copy `customers/acme.tfvars` to `customers/<slug>.tfvars` and set:
 
 - `customer`: slug, name, logo and colors (the SPA theme, and the default branding of the organizations);
 - `organizations`: name, display name and optional logo / colors of each organization;
-- `test_users`: alias (email through `test_users_email_template`), name, `organizations` (`organization = "member"` or `"admin"`), `roles` (application roles), `receives_emails` (real mailbox and passwordless login; otherwise `<alias>@example.com`) and app_metadata (`dae_role`: Delegated Administration extension role, given as a direct role);
+- `test_users`: alias (email through `test_users_email_template`), name, `organizations` (`organization = "member"` or `"admin"`), `roles` (application roles), `receives_emails` (real mailbox and passwordless login; otherwise `<alias>@example.com`), `locale` (interface language, `en` or `fr`: `app_metadata.locale`, read by the Admin UI and the applications; default `test_users_locale`, `en`) and app_metadata (`dae_role`: Delegated Administration extension role, given as a direct role);
 - optionally `app_name`, `roles`, `claims_namespace`, `spa_urls` / `web_app_urls` (deployed demo URLs).
 
 ## What the customer variables drive
