@@ -9,6 +9,7 @@ import TokenPage from "./pages/TokenPage";
 import AdaptiveMfaPage from "./pages/AdaptiveMfaPage";
 import OrganizationPage from "./pages/OrganizationPage";
 import SettingsPage from "./pages/SettingsPage";
+import ScenariosPage from "./pages/ScenariosPage";
 import { OrganizationProvider } from "./context/OrganizationContext";
 import { useTheme } from "./context/ThemeContext";
 import { getOrgId } from "./config/organizationBranding";
@@ -107,6 +108,7 @@ const AppContent = () => {
           <Route path="/token" element={<TokenPage />} />
           <Route path="/adaptive-mfa" element={<AdaptiveMfaPage />} />
           <Route path="/organization" element={<OrganizationPage />} />
+          <Route path="/scenarios" element={<ScenariosPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/dae-extension" element={<DaeExtensionPage />} />
         </Routes>

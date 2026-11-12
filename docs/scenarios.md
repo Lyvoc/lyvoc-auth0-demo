@@ -1,6 +1,6 @@
 # Demo scenarios
 
-Scenarios to present the demo to a prospect, and to check it before a session. Each one gives its point (what to say), the steps and the expected result. The examples use the Acme customer (`terraform/customers/acme.tfvars`); with another customer, replace the organization and account names by its own (the portal's welcome page lists them).
+Scenarios to present the demo to a prospect, and to check it before a session. Each one gives its point (what to say), the steps and the expected result. The portal shows them too (menu **Scenarios**, one tab per scenario), built from the customer's configuration, with the login buttons of each step. The examples use the Acme customer (`terraform/customers/acme.tfvars`); with another customer, replace the organization and account names by its own (the portal's welcome page lists them).
 
 ## Before the demo
 

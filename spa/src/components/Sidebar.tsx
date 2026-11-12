@@ -106,6 +106,16 @@ const Sidebar = () => {
         Organization
       </NavLink>
 
+      <NavLink to="/scenarios" style={({ isActive }) => ({
+        color: isActive ? "var(--primary-color)" : "var(--text-secondary)",
+        textDecoration: "none",
+        fontWeight: 600,
+        fontSize: 17,
+        marginBottom: 16,
+      })}>
+        Scenarios
+      </NavLink>
+
       {features.dae && (
         <NavLink
           to="/dae-extension"
