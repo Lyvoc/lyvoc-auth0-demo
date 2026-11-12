@@ -1,8 +1,87 @@
 import React, { useState, useEffect } from "react";
 import { useTheme, DEFAULT_THEME } from "../context/ThemeContext";
+import { defineMessages, useMessages } from "../i18n";
+
+const MESSAGES = defineMessages(
+  {
+    title: "Theme Settings",
+    intro: "Customize the appearance of this demo app for customer presentations.",
+    customActive: "(Custom theme active)",
+    branding: "Branding",
+    customerName: "Customer Name",
+    customerNamePlaceholder: "e.g., Acme Corp",
+    customerNameHint: "Appears in browser tab and sidebar header",
+    logoUrl: "Logo URL",
+    logoUrlHint: "Public URL to customer logo (PNG, SVG, or WebP recommended)",
+    logoPreview: "Logo Preview:",
+    logoPreviewAlt: "Logo preview",
+    colors: "Colors",
+    primaryColor: "Primary Color",
+    primaryColorHint: "Links, active states",
+    secondaryColor: "Secondary Color",
+    secondaryColorHint: "Accents, highlights",
+    bgPrimary: "Background (Primary)",
+    bgPrimaryHint: "Main page background",
+    bgSecondary: "Background (Cards)",
+    bgSecondaryHint: "Card backgrounds",
+    bgSidebar: "Sidebar Background",
+    bgSidebarHint: "Navigation sidebar",
+    textPrimary: "Text (Primary)",
+    textPrimaryHint: "Headings, titles",
+    preview: "Preview",
+    logo: "Logo",
+    demo: "CIC Demo",
+    activeLink: "Active Link",
+    normalLink: "Normal Link",
+    card: "Card",
+    button: "Button",
+    reset: "Reset to Defaults",
+    saved: "✓ Saved!",
+    save: "Save Theme",
+    defaultsReference: "Default Theme Reference",
+  },
+  {
+    title: "Paramètres du thème",
+    intro: "Personnalisez l'apparence de cette application de démo pour vos présentations clients.",
+    customActive: "(Thème personnalisé actif)",
+    branding: "Identité visuelle",
+    customerName: "Nom du client",
+    customerNamePlaceholder: "ex. : Acme Corp",
+    customerNameHint: "Affiché dans l'onglet du navigateur et en tête de la barre latérale",
+    logoUrl: "URL du logo",
+    logoUrlHint: "URL publique du logo du client (PNG, SVG ou WebP recommandé)",
+    logoPreview: "Aperçu du logo :",
+    logoPreviewAlt: "Aperçu du logo",
+    colors: "Couleurs",
+    primaryColor: "Couleur principale",
+    primaryColorHint: "Liens, éléments actifs",
+    secondaryColor: "Couleur secondaire",
+    secondaryColorHint: "Accents, mises en avant",
+    bgPrimary: "Fond (principal)",
+    bgPrimaryHint: "Fond principal des pages",
+    bgSecondary: "Fond (cartes)",
+    bgSecondaryHint: "Fond des cartes",
+    bgSidebar: "Fond de la barre latérale",
+    bgSidebarHint: "Barre latérale de navigation",
+    textPrimary: "Texte (principal)",
+    textPrimaryHint: "En-têtes, titres",
+    preview: "Aperçu",
+    logo: "Logo",
+    demo: "Démo CIC",
+    activeLink: "Lien actif",
+    normalLink: "Lien normal",
+    card: "Carte",
+    button: "Bouton",
+    reset: "Rétablir les valeurs par défaut",
+    saved: "✓ Enregistré !",
+    save: "Enregistrer le thème",
+    defaultsReference: "Thème par défaut (référence)",
+  }
+);
 
 const SettingsPage: React.FC = () => {
   const { theme, updateTheme, resetTheme, isCustomized } = useTheme();
+  const m = useMessages(MESSAGES);
   
   // Local state for form fields
   const [formValues, setFormValues] = useState(theme);
@@ -66,12 +145,12 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div style={{ padding: 24, maxWidth: 800, margin: "0 auto", width: "100%" }}>
-      <h2 style={{ color: "var(--primary-color)", marginBottom: 8 }}>Theme Settings</h2>
+      <h2 style={{ color: "var(--primary-color)", marginBottom: 8 }}>{m.title}</h2>
       <p style={{ color: "var(--text-muted)", marginBottom: 24 }}>
-        Customize the appearance of this demo app for customer presentations.
+        {m.intro}
         {isCustomized && (
           <span style={{ color: "var(--secondary-color)", marginLeft: 8 }}>
-            (Custom theme active)
+            {m.customActive}
           </span>
         )}
       </p>
@@ -79,25 +158,25 @@ const SettingsPage: React.FC = () => {
       {/* Branding Section */}
       <div style={sectionStyle}>
         <h3 style={{ color: "var(--text-primary)", marginTop: 0, marginBottom: 16 }}>
-          Branding
+          {m.branding}
         </h3>
         
         <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>Customer Name</label>
+          <label style={labelStyle}>{m.customerName}</label>
           <input
             type="text"
             value={formValues.customerName}
             onChange={(e) => handleChange("customerName", e.target.value)}
-            placeholder="e.g., Acme Corp"
+            placeholder={m.customerNamePlaceholder}
             style={inputStyle}
           />
           <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
-            Appears in browser tab and sidebar header
+            {m.customerNameHint}
           </small>
         </div>
 
         <div style={{ marginBottom: 16 }}>
-          <label style={labelStyle}>Logo URL</label>
+          <label style={labelStyle}>{m.logoUrl}</label>
           <input
             type="text"
             value={formValues.logoUrl}
@@ -106,16 +185,16 @@ const SettingsPage: React.FC = () => {
             style={inputStyle}
           />
           <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
-            Public URL to customer logo (PNG, SVG, or WebP recommended)
+            {m.logoUrlHint}
           </small>
         </div>
 
         {formValues.logoUrl && (
           <div style={{ marginTop: 12, padding: 12, background: "var(--bg-sidebar)", borderRadius: 8, textAlign: "center" }}>
-            <small style={{ color: "var(--text-muted)", display: "block", marginBottom: 8 }}>Logo Preview:</small>
+            <small style={{ color: "var(--text-muted)", display: "block", marginBottom: 8 }}>{m.logoPreview}</small>
             <img 
               src={formValues.logoUrl} 
-              alt="Logo preview" 
+              alt={m.logoPreviewAlt} 
               style={{ maxWidth: 140, maxHeight: 60, objectFit: "contain" }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
@@ -126,13 +205,13 @@ const SettingsPage: React.FC = () => {
       {/* Colors Section */}
       <div style={sectionStyle}>
         <h3 style={{ color: "var(--text-primary)", marginTop: 0, marginBottom: 16 }}>
-          Colors
+          {m.colors}
         </h3>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
           {/* Primary Color */}
           <div>
-            <label style={labelStyle}>Primary Color</label>
+            <label style={labelStyle}>{m.primaryColor}</label>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <input
                 type="color"
@@ -147,12 +226,12 @@ const SettingsPage: React.FC = () => {
                 style={{ ...inputStyle, flex: 1 }}
               />
             </div>
-            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>Links, active states</small>
+            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{m.primaryColorHint}</small>
           </div>
 
           {/* Secondary Color */}
           <div>
-            <label style={labelStyle}>Secondary Color</label>
+            <label style={labelStyle}>{m.secondaryColor}</label>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <input
                 type="color"
@@ -167,12 +246,12 @@ const SettingsPage: React.FC = () => {
                 style={{ ...inputStyle, flex: 1 }}
               />
             </div>
-            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>Accents, highlights</small>
+            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{m.secondaryColorHint}</small>
           </div>
 
           {/* Background Primary */}
           <div>
-            <label style={labelStyle}>Background (Primary)</label>
+            <label style={labelStyle}>{m.bgPrimary}</label>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <input
                 type="color"
@@ -187,12 +266,12 @@ const SettingsPage: React.FC = () => {
                 style={{ ...inputStyle, flex: 1 }}
               />
             </div>
-            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>Main page background</small>
+            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{m.bgPrimaryHint}</small>
           </div>
 
           {/* Background Secondary */}
           <div>
-            <label style={labelStyle}>Background (Cards)</label>
+            <label style={labelStyle}>{m.bgSecondary}</label>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <input
                 type="color"
@@ -207,12 +286,12 @@ const SettingsPage: React.FC = () => {
                 style={{ ...inputStyle, flex: 1 }}
               />
             </div>
-            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>Card backgrounds</small>
+            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{m.bgSecondaryHint}</small>
           </div>
 
           {/* Sidebar Background */}
           <div>
-            <label style={labelStyle}>Sidebar Background</label>
+            <label style={labelStyle}>{m.bgSidebar}</label>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <input
                 type="color"
@@ -227,12 +306,12 @@ const SettingsPage: React.FC = () => {
                 style={{ ...inputStyle, flex: 1 }}
               />
             </div>
-            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>Navigation sidebar</small>
+            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{m.bgSidebarHint}</small>
           </div>
 
           {/* Text Primary */}
           <div>
-            <label style={labelStyle}>Text (Primary)</label>
+            <label style={labelStyle}>{m.textPrimary}</label>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <input
                 type="color"
@@ -247,7 +326,7 @@ const SettingsPage: React.FC = () => {
                 style={{ ...inputStyle, flex: 1 }}
               />
             </div>
-            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>Headings, titles</small>
+            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{m.textPrimaryHint}</small>
           </div>
         </div>
       </div>
@@ -255,7 +334,7 @@ const SettingsPage: React.FC = () => {
       {/* Preview Section */}
       <div style={sectionStyle}>
         <h3 style={{ color: "var(--text-primary)", marginTop: 0, marginBottom: 16 }}>
-          Preview
+          {m.preview}
         </h3>
         <div style={{ 
           display: "flex", 
@@ -278,16 +357,16 @@ const SettingsPage: React.FC = () => {
             {formValues.logoUrl ? (
               <img src={formValues.logoUrl} alt="" style={{ maxWidth: 50, maxHeight: 40, objectFit: "contain" }} />
             ) : (
-              <span style={{ color: formValues.textMuted, fontSize: 10 }}>Logo</span>
+              <span style={{ color: formValues.textMuted, fontSize: 10 }}>{m.logo}</span>
             )}
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ color: formValues.textPrimary, fontWeight: 600, marginBottom: 4 }}>
-              {formValues.customerName && formValues.customerName.trim() ? formValues.customerName : DEFAULT_THEME.customerName} CIC Demo
+              {formValues.customerName && formValues.customerName.trim() ? formValues.customerName : DEFAULT_THEME.customerName} {m.demo}
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <span style={{ color: formValues.primaryColor, fontWeight: 500 }}>Active Link</span>
-              <span style={{ color: formValues.textSecondary }}>Normal Link</span>
+              <span style={{ color: formValues.primaryColor, fontWeight: 500 }}>{m.activeLink}</span>
+              <span style={{ color: formValues.textSecondary }}>{m.normalLink}</span>
             </div>
           </div>
           <div style={{ 
@@ -297,7 +376,7 @@ const SettingsPage: React.FC = () => {
             color: formValues.textMuted,
             fontSize: "0.85rem"
           }}>
-            Card
+            {m.card}
           </div>
           <button style={{
             background: formValues.primaryColor,
@@ -308,7 +387,7 @@ const SettingsPage: React.FC = () => {
             fontWeight: 600,
             cursor: "pointer"
           }}>
-            Button
+            {m.button}
           </button>
         </div>
       </div>
@@ -327,7 +406,7 @@ const SettingsPage: React.FC = () => {
             cursor: "pointer",
           }}
         >
-          Reset to Defaults
+          {m.reset}
         </button>
         <button
           onClick={handleSave}
@@ -341,14 +420,14 @@ const SettingsPage: React.FC = () => {
             cursor: "pointer",
           }}
         >
-          {saved ? "✓ Saved!" : "Save Theme"}
+          {saved ? m.saved : m.save}
         </button>
       </div>
 
       {/* Defaults Reference */}
       <div style={{ ...sectionStyle, marginTop: 32, opacity: 0.8 }}>
         <h4 style={{ color: "var(--text-muted)", marginTop: 0, marginBottom: 12 }}>
-          Default Theme Reference
+          {m.defaultsReference}
         </h4>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {Object.entries(DEFAULT_THEME).filter(([k]) => k.includes("Color") || k.includes("bg") || k.includes("text")).map(([key, value]) => (

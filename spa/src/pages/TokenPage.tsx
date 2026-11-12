@@ -1,6 +1,62 @@
 import React from "react";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth0 } from "../auth";
 import LoginButton from "../components/LoginButton";
+import { defineMessages, useMessages } from "../i18n";
+
+const MESSAGES = defineMessages(
+  {
+    loading: "Loading...",
+    authError: "Authentication Error",
+    logInAgain: "Log In Again",
+    processing: "Processing authentication...",
+    loginRequired: "You need to log in to view your token",
+    loginExplanation: (
+      <>
+        Clicking <b>Log In</b> will trigger the default Auth0 Universal Login experience, where all connections (databases, social, enterprise, passwordless, etc.) enabled for this application in your tenant will be shown.
+      </>
+    ),
+    yourTokens: "Your Auth0 Tokens",
+    accessToken: "Access Token",
+    idToken: "ID Token",
+    rawToken: "Raw Token:",
+    copied: "Copied!",
+    copy: "📋 Copy",
+    noAccessToken: "No access token available.",
+    noIdToken: "No ID token available.",
+    header: "Header:",
+    payload: "Payload:",
+    signature: "Signature:",
+    user: "User:",
+    idpInitiated: "(IdP-initiated, not decoded)",
+    unknown: "Unknown",
+  },
+  {
+    loading: "Chargement...",
+    authError: "Erreur d'authentification",
+    logInAgain: "Se reconnecter",
+    processing: "Authentification en cours...",
+    loginRequired: "Connectez-vous pour afficher votre token",
+    loginExplanation: (
+      <>
+        Cliquer sur <b>Se connecter</b> ouvre l'expérience Auth0 Universal Login par défaut, qui affiche toutes les connexions (bases de données, réseaux sociaux, entreprise, sans mot de passe, etc.) activées pour cette application dans votre tenant.
+      </>
+    ),
+    yourTokens: "Vos tokens Auth0",
+    accessToken: "Access Token",
+    idToken: "ID Token",
+    rawToken: "Token brut :",
+    copied: "Copié !",
+    copy: "📋 Copier",
+    noAccessToken: "Aucun access token disponible.",
+    noIdToken: "Aucun ID token disponible.",
+    header: "Header :",
+    payload: "Payload :",
+    signature: "Signature :",
+    user: "Utilisateur :",
+    idpInitiated: "(initié par l'IdP, non décodé)",
+    unknown: "Inconnu",
+  }
+);
 
 
 const decodeJWT = (token: string) => {
@@ -28,6 +84,7 @@ const TokenPage = () => {
   const [copiedId, setCopiedId] = React.useState(false);
   const [manualTokens, setManualTokens] = React.useState<{ accessToken?: string; idToken?: string } | null>(null);
   const [authTimeout, setAuthTimeout] = React.useState(false);
+  const m = useMessages(MESSAGES);
 
   // Add timeout for authentication processing
   React.useEffect(() => {
@@ -80,7 +137,7 @@ const TokenPage = () => {
   React.useEffect(() => {
     if (isAuthenticated) {
       getAccessTokenSilently()
-        .then(setAccessToken)
+        .then((token) => setAccessToken(token ?? ""))
         .catch((err) => setError(err.message));
       getIdTokenClaims()
         .then((claims) => {
@@ -115,7 +172,7 @@ const TokenPage = () => {
   if (isLoading) {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
-        <div className="loading-text" style={{ color: "#63b3ed", fontSize: 24 }}>Loading...</div>
+        <div className="loading-text" style={{ color: "#63b3ed", fontSize: 24 }}>{m.loading}</div>
       </div>
     );
   }
@@ -124,7 +181,7 @@ const TokenPage = () => {
   if (authError) {
     return (
       <div style={{ textAlign: "center", marginTop: 60 }}>
-        <h2 style={{ color: "#fc8181" }}>Authentication Error</h2>
+        <h2 style={{ color: "#fc8181" }}>{m.authError}</h2>
         <div style={{ color: "#b2b7c2", margin: "16px 0 24px 0", fontSize: 16 }}>
           {authError.message}
         </div>
@@ -134,7 +191,7 @@ const TokenPage = () => {
           onClick={() => loginWithRedirect({ authorizationParams: { prompt: "login" } })}
           className="button login"
         >
-          Log In Again
+          {m.logInAgain}
         </button>
       </div>
     );
@@ -147,16 +204,16 @@ const TokenPage = () => {
     if ((urlParams.get('code') || urlParams.get('state')) && !authTimeout) {
       return (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
-          <div className="loading-text" style={{ color: "#63b3ed", fontSize: 24 }}>Processing authentication...</div>
+          <div className="loading-text" style={{ color: "#63b3ed", fontSize: 24 }}>{m.processing}</div>
         </div>
       );
     }
     
     return (
       <div style={{ textAlign: "center", marginTop: 60 }}>
-        <h2 style={{ color: "#f7fafc" }}>You need to log in to view your token</h2>
+        <h2 style={{ color: "#f7fafc" }}>{m.loginRequired}</h2>
         <div style={{ color: "#b2b7c2", margin: "16px 0 24px 0", fontSize: 16 }}>
-          Clicking <b>Log In</b> will trigger the default Auth0 Universal Login experience, where all connections (databases, social, enterprise, passwordless, etc.) enabled for this application in your tenant will be shown.
+          {m.loginExplanation}
         </div>
         <LoginButton />
       </div>
@@ -165,33 +222,33 @@ const TokenPage = () => {
 
   return (
     <div style={{ maxWidth: 1600, width: "100%", margin: "2rem auto", background: "#2d313c", borderRadius: 15, padding: "2rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <h2 style={{ color: "#63b3ed", marginBottom: 24, textAlign: "center" }}>Your Auth0 Tokens</h2>
+      <h2 style={{ color: "#63b3ed", marginBottom: 24, textAlign: "center" }}>{m.yourTokens}</h2>
       {error && <div style={{ color: "#fc8181", marginBottom: 16 }}>{error}</div>}
       <div style={{ display: "flex", gap: 32, justifyContent: "center", width: "100%" }}>
         {/* Access Token Column */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{ color: "#ed8936", marginBottom: 8 }}>Access Token</h3>
+          <h3 style={{ color: "#ed8936", marginBottom: 8 }}>{m.accessToken}</h3>
           <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ color: "#a0aec0", fontSize: 15 }}>Raw Token:</span>
+            <span style={{ color: "#a0aec0", fontSize: 15 }}>{m.rawToken}</span>
             <button onClick={handleCopyAccess} className="token-copy-button" style={{ fontSize: 14 }}>
-              {copiedAccess ? "Copied!" : "📋 Copy"}
+              {copiedAccess ? m.copied : m.copy}
             </button>
           </div>
           <div style={{ background: "#1a1e27", padding: 16, borderRadius: 8, color: "#e2e8f0", fontFamily: "monospace", wordBreak: "break-all", marginBottom: 24, maxHeight: 200, overflow: "auto" }}>
-            {effectiveAccessToken || "No access token available."}
+            {effectiveAccessToken || m.noAccessToken}
           </div>
           {decodedAccess && (
             <>
               <div style={{ marginBottom: 18 }}>
-                <div className="token-section-label">Header:</div>
+                <div className="token-section-label">{m.header}</div>
                 <pre className="token-decoded-display">{JSON.stringify(decodedAccess.header, null, 2)}</pre>
               </div>
               <div style={{ marginBottom: 18 }}>
-                <div className="token-section-label">Payload:</div>
+                <div className="token-section-label">{m.payload}</div>
                 <pre className="token-decoded-display">{JSON.stringify(decodedAccess.payload, null, 2)}</pre>
               </div>
               <div style={{ marginBottom: 18 }}>
-                <div className="token-section-label">Signature:</div>
+                <div className="token-section-label">{m.signature}</div>
                 <div className="token-raw-display">{decodedAccess.signature}</div>
               </div>
             </>
@@ -199,28 +256,28 @@ const TokenPage = () => {
         </div>
         {/* ID Token Column */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{ color: "#38a169", marginBottom: 8 }}>ID Token</h3>
+          <h3 style={{ color: "#38a169", marginBottom: 8 }}>{m.idToken}</h3>
           <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ color: "#a0aec0", fontSize: 15 }}>Raw Token:</span>
+            <span style={{ color: "#a0aec0", fontSize: 15 }}>{m.rawToken}</span>
             <button onClick={handleCopyId} className="token-copy-button" style={{ fontSize: 14 }}>
-              {copiedId ? "Copied!" : "📋 Copy"}
+              {copiedId ? m.copied : m.copy}
             </button>
           </div>
           <div style={{ background: "#1a1e27", padding: 16, borderRadius: 8, color: "#e2e8f0", fontFamily: "monospace", wordBreak: "break-all", marginBottom: 24, maxHeight: 200, overflow: "auto" }}>
-            {effectiveIdToken || "No ID token available."}
+            {effectiveIdToken || m.noIdToken}
           </div>
           {decodedId && (
             <>
               <div style={{ marginBottom: 18 }}>
-                <div className="token-section-label">Header:</div>
+                <div className="token-section-label">{m.header}</div>
                 <pre className="token-decoded-display">{JSON.stringify(decodedId.header, null, 2)}</pre>
               </div>
               <div style={{ marginBottom: 18 }}>
-                <div className="token-section-label">Payload:</div>
+                <div className="token-section-label">{m.payload}</div>
                 <pre className="token-decoded-display">{JSON.stringify(decodedId.payload, null, 2)}</pre>
               </div>
               <div style={{ marginBottom: 18 }}>
-                <div className="token-section-label">Signature:</div>
+                <div className="token-section-label">{m.signature}</div>
                 <div className="token-raw-display">{decodedId.signature}</div>
               </div>
             </>
@@ -228,7 +285,7 @@ const TokenPage = () => {
         </div>
       </div>
       <div style={{ marginTop: 32, color: "#a0aec0", textAlign: "center" }}>
-        <strong>User:</strong> {user?.email || user?.name || (manualTokens?.idToken ? "(IdP-initiated, not decoded)" : "Unknown")}
+        <strong>{m.user}</strong> {user?.email || user?.name || (manualTokens?.idToken ? m.idpInitiated : m.unknown)}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth0 } from "./auth";
 import Sidebar from "./components/Sidebar";
 import DaeExtensionPage from "./pages/DaeExtensionPage";
 import Welcome from "./pages/Welcome";

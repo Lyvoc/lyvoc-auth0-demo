@@ -5,6 +5,32 @@ import {
   getAccessibleApplications,
   OrganizationBranding,
 } from "../config/organizationBranding";
+import { defineMessages, useMessages } from "../i18n";
+
+const MESSAGES = defineMessages(
+  {
+    noApplications: "No applications available for your role.",
+    open: (app: string) => `Open ${app}`,
+    noAccessTo: (app: string) => `No access to ${app}`,
+    locked: "🔒 Locked",
+    access: "✓ Access",
+    yourRoles: "Your Roles",
+    noRoles: "No roles assigned",
+    applicationAccess: (count: number, total: number) => `Application Access (${count}/${total})`,
+    noAccessibleApps: "No applications accessible with current roles",
+  },
+  {
+    noApplications: "Aucune application disponible pour votre rôle.",
+    open: (app) => `Ouvrir ${app}`,
+    noAccessTo: (app) => `Aucun accès à ${app}`,
+    locked: "🔒 Verrouillée",
+    access: "✓ Accès",
+    yourRoles: "Vos rôles",
+    noRoles: "Aucun rôle attribué",
+    applicationAccess: (count, total) => `Accès aux applications (${count}/${total})`,
+    noAccessibleApps: "Aucune application accessible avec les rôles actuels",
+  }
+);
 
 interface ApplicationTilesProps {
   /** User's roles in current organization */
@@ -26,6 +52,7 @@ const ApplicationTiles: React.FC<ApplicationTilesProps> = ({
   onAppClick,
   compact = false,
 }) => {
+  const m = useMessages(MESSAGES);
   const accessibleApps = getAccessibleApplications(roles);
   const accessibleIds = new Set(accessibleApps.map((a) => a.id));
   const allApps = Object.values(APPLICATIONS);
@@ -131,7 +158,7 @@ const ApplicationTiles: React.FC<ApplicationTilesProps> = ({
   if (appsToShow.length === 0) {
     return (
       <div style={{ padding: "1rem", textAlign: "center", color: "var(--text-muted)" }}>
-        No applications available for your role.
+        {m.noApplications}
       </div>
     );
   }
@@ -147,7 +174,7 @@ const ApplicationTiles: React.FC<ApplicationTilesProps> = ({
             onClick={() => handleTileClick(app, isAccessible)}
             onMouseEnter={(e) => handleTileHover(e, isAccessible, true)}
             onMouseLeave={(e) => handleTileHover(e, isAccessible, false)}
-            title={isAccessible ? `Open ${app.name}` : `No access to ${app.name}`}
+            title={isAccessible ? m.open(app.name) : m.noAccessTo(app.name)}
           >
             {compact ? (
               <>
@@ -163,8 +190,8 @@ const ApplicationTiles: React.FC<ApplicationTilesProps> = ({
               <>
                 <div style={iconStyle(isAccessible)}>{app.icon}</div>
                 <div style={nameStyle}>{app.name}</div>
-                {showAllApps && !isAccessible && <div style={lockedBadgeStyle}>🔒 Locked</div>}
-                {isAccessible && <div style={accessBadgeStyle}>✓ Access</div>}
+                {showAllApps && !isAccessible && <div style={lockedBadgeStyle}>{m.locked}</div>}
+                {isAccessible && <div style={accessBadgeStyle}>{m.access}</div>}
               </>
             )}
           </div>
@@ -181,6 +208,7 @@ export const RoleAccessSummary: React.FC<{
   roles: string[];
   primaryColor?: string;
 }> = ({ roles, primaryColor = "var(--primary-color)" }) => {
+  const m = useMessages(MESSAGES);
   const accessibleApps = getAccessibleApplications(roles);
 
   const containerStyle: React.CSSProperties = {
@@ -225,7 +253,7 @@ export const RoleAccessSummary: React.FC<{
 
   return (
     <div style={containerStyle}>
-      <div style={headerStyle}>Your Roles</div>
+      <div style={headerStyle}>{m.yourRoles}</div>
       <div>
         {roles.length > 0 ? (
           roles.map((role) => (
@@ -234,13 +262,13 @@ export const RoleAccessSummary: React.FC<{
             </span>
           ))
         ) : (
-          <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>No roles assigned</span>
+          <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>{m.noRoles}</span>
         )}
       </div>
 
       <div style={appListStyle}>
         <div style={{ ...headerStyle, marginBottom: "0.5rem" }}>
-          Application Access ({accessibleApps.length}/{Object.keys(APPLICATIONS).length})
+          {m.applicationAccess(accessibleApps.length, Object.keys(APPLICATIONS).length)}
         </div>
         {accessibleApps.map((app) => (
           <div key={app.id} style={appItemStyle}>
@@ -250,7 +278,7 @@ export const RoleAccessSummary: React.FC<{
         ))}
         {accessibleApps.length === 0 && (
           <div style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
-            No applications accessible with current roles
+            {m.noAccessibleApps}
           </div>
         )}
       </div>

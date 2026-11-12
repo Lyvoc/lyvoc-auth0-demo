@@ -1,14 +1,52 @@
 import { NavLink } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth0 } from "../auth";
 import { useTheme } from "../context/ThemeContext";
 import { OrganizationBadge } from "./OrganizationPicker";
 import { demoConfig } from "../config/demo";
+import { defineMessages, LOCALE_LABELS, LOCALES, useLanguage, useMessages } from "../i18n";
+
+const MESSAGES = defineMessages(
+  {
+    demo: "CIC Demo",
+    welcome: "Welcome",
+    adaptiveMfa: "Adaptive MFA",
+    token: "Token / Profile",
+    organization: "Organization",
+    scenarios: "Scenarios",
+    dae: "DAE Extension",
+    adminUi: "Admin UI ↗",
+    passwordless: "Passwordless Login",
+    universalLogin: "Universal Login",
+    logout: "Log Out",
+    logoutConfirm: "Are you sure you want to log out?",
+    settings: "⚙ Settings",
+    language: "Language",
+  },
+  {
+    demo: "Démo CIC",
+    welcome: "Accueil",
+    adaptiveMfa: "MFA adaptative",
+    token: "Token / Profil",
+    organization: "Organisation",
+    scenarios: "Scénarios",
+    dae: "Extension DAE",
+    adminUi: "Admin UI ↗",
+    passwordless: "Connexion sans mot de passe",
+    universalLogin: "Universal Login",
+    logout: "Se déconnecter",
+    logoutConfirm: "Voulez-vous vraiment vous déconnecter ?",
+    settings: "⚙ Paramètres",
+    language: "Langue",
+  }
+);
 
 const { features } = demoConfig;
 
 const Sidebar = () => {
   const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
   const { theme, currentOrgBranding } = useTheme();
+  const { locale, setLocale } = useLanguage();
+  const m = useMessages(MESSAGES);
 
   const handlePasswordless = () => {
     loginWithRedirect({
@@ -47,7 +85,7 @@ const Sidebar = () => {
           />
         )}
         <div style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: 18 }}>
-          {theme.customerName && theme.customerName.trim() ? theme.customerName : demoConfig.customer.name} CIC Demo
+          {theme.customerName && theme.customerName.trim() ? theme.customerName : demoConfig.customer.name} {m.demo}
         </div>
 
         {/* Organization Badge */}
@@ -73,7 +111,7 @@ const Sidebar = () => {
         fontSize: 17,
         marginBottom: 16,
       })}>
-        Welcome
+        {m.welcome}
       </NavLink>
       {features.mfa !== "off" && (
         <NavLink to="/adaptive-mfa" style={({ isActive }) => ({
@@ -83,7 +121,7 @@ const Sidebar = () => {
           fontSize: 17,
           marginBottom: 16,
         })}>
-          Adaptive MFA
+          {m.adaptiveMfa}
         </NavLink>
       )}
       <NavLink to="/token" style={({ isActive }) => ({
@@ -93,7 +131,7 @@ const Sidebar = () => {
         fontSize: 17,
         marginBottom: 16,
       })}>
-        Token / Profile
+        {m.token}
       </NavLink>
 
       <NavLink to="/organization" style={({ isActive }) => ({
@@ -103,7 +141,7 @@ const Sidebar = () => {
         fontSize: 17,
         marginBottom: 16,
       })}>
-        Organization
+        {m.organization}
       </NavLink>
 
       <NavLink to="/scenarios" style={({ isActive }) => ({
@@ -113,7 +151,7 @@ const Sidebar = () => {
         fontSize: 17,
         marginBottom: 16,
       })}>
-        Scenarios
+        {m.scenarios}
       </NavLink>
 
       {features.dae && (
@@ -135,7 +173,7 @@ const Sidebar = () => {
             transition: "background 0.2s, color 0.2s",
           })}
         >
-          DAE Extension
+          {m.dae}
         </NavLink>
       )}
 
@@ -157,7 +195,7 @@ const Sidebar = () => {
             textAlign: "left",
           }}
         >
-          Admin UI ↗
+          {m.adminUi}
         </a>
       )}
 
@@ -177,7 +215,7 @@ const Sidebar = () => {
             textAlign: "left",
           }}
         >
-          Passwordless Login
+          {m.passwordless}
         </button>
       )}
 
@@ -197,11 +235,11 @@ const Sidebar = () => {
           textAlign: "left",
         }}
       >
-        Universal Login
+        {m.universalLogin}
       </button>
       <button
         onClick={() => {
-          if (window.confirm("Are you sure you want to log out?")) {
+          if (window.confirm(m.logoutConfirm)) {
             // Enhanced universal logout - clear all browser storage
             localStorage.clear();
             sessionStorage.clear();
@@ -243,10 +281,35 @@ const Sidebar = () => {
           textAlign: "left",
         }}
       >
-        Log Out
+        {m.logout}
       </button>
       {/* Spacer to push settings to bottom */}
       <div style={{ flex: 1 }} />
+
+      {/* Display language (also the language of the Auth0 login pages) */}
+      <div role="group" aria-label={m.language} style={{ display: "flex", gap: 6, marginTop: 16 }}>
+        {LOCALES.map((value) => (
+          <button
+            key={value}
+            onClick={() => setLocale(value)}
+            title={LOCALE_LABELS[value]}
+            aria-pressed={value === locale}
+            style={{
+              flex: 1,
+              padding: "0.4rem 0",
+              borderRadius: 6,
+              border: `1px solid ${value === locale ? "var(--primary-color)" : "var(--text-muted)"}`,
+              background: value === locale ? "var(--primary-color)" : "transparent",
+              color: value === locale ? "#fff" : "var(--text-secondary)",
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            {value.toUpperCase()}
+          </button>
+        ))}
+      </div>
 
       <NavLink to="/settings" style={({ isActive }) => ({
         color: isActive ? "var(--primary-color)" : "var(--text-secondary)",
@@ -257,7 +320,7 @@ const Sidebar = () => {
         borderTop: "1px solid var(--text-muted)",
         marginTop: 16,
       })}>
-        ⚙ Settings
+        {m.settings}
       </NavLink>    </nav>
   );
 };

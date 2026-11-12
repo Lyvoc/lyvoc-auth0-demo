@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { OrganizationBranding, getOrganizationBranding } from "../config/organizationBranding";
 import { demoConfig } from "../config/demo";
+import { useLanguage, type Locale } from "../i18n";
+
+// Browser tab title suffix (same wording as the sidebar)
+const DEMO_LABEL: Record<Locale, string> = { en: "CIC Demo", fr: "Démo CIC" };
 
 // Default theme values: the customer of the demo configuration, then :root in index.css
 const DEFAULT_THEME = {
@@ -73,7 +77,7 @@ const loadTheme = (): ThemeConfig => {
 };
 
 // Apply theme to CSS custom properties
-const applyTheme = (theme: ThemeConfig) => {
+const applyTheme = (theme: ThemeConfig, locale: Locale) => {
   const root = document.documentElement;
   root.style.setProperty("--primary-color", theme.primaryColor);
   root.style.setProperty("--secondary-color", theme.secondaryColor);
@@ -86,7 +90,7 @@ const applyTheme = (theme: ThemeConfig) => {
   
   // Update document title (fallback to the configured customer)
   const customerName = theme.customerName && theme.customerName.trim() ? theme.customerName : demoConfig.customer.name;
-  document.title = `${customerName} CIC Demo`;
+  document.title = `${customerName} ${DEMO_LABEL[locale]}`;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -94,6 +98,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const ORG_THEME_STORAGE_KEY = "auth0-cic-demo-org-theme";
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { locale } = useLanguage();
   const [theme, setTheme] = useState<ThemeConfig>(loadTheme);
   const [isCustomized, setIsCustomized] = useState(false);
   const [currentOrgBranding, setCurrentOrgBranding] = useState<OrganizationBranding | null>(null);
@@ -114,8 +119,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Apply theme on mount and when it changes
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    applyTheme(theme, locale);
+  }, [theme, locale]);
 
   const updateTheme = (updates: Partial<ThemeConfig>) => {
     const newTheme = { ...theme, ...updates };

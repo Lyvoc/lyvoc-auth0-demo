@@ -7,6 +7,7 @@ import "./index.css";
 import { BrowserRouter, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { demoConfig } from "./config/demo";
+import { LanguageProvider, currentLocale } from "./i18n";
 
 // Environment variables override the demo configuration (spa/src/config/demo.json)
 const domain = import.meta.env.VITE_AUTH0_DOMAIN || demoConfig.auth0.domain;
@@ -41,7 +42,9 @@ function Auth0WithRouter() {
       authorizationParams={{
         redirect_uri: window.location.origin + "/token",
         audience: audience,
-        scope: "openid profile email read:data"
+        scope: "openid profile email read:data",
+        // Auth0 pages in the portal's language (each login sends the current one)
+        ui_locales: currentLocale(),
       }}
       onRedirectCallback={(appState) => {
         // Navigate to the intended page or /token if none specified
@@ -55,10 +58,12 @@ function Auth0WithRouter() {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <BrowserRouter>
-        <Auth0WithRouter />
-      </BrowserRouter>
-    </ThemeProvider>
+    <LanguageProvider>
+      <ThemeProvider>
+        <BrowserRouter>
+          <Auth0WithRouter />
+        </BrowserRouter>
+      </ThemeProvider>
+    </LanguageProvider>
   </React.StrictMode>
 );

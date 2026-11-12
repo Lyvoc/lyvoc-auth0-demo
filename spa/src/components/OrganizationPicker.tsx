@@ -1,7 +1,27 @@
 import React, { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth0 } from "../auth";
 import { getAvailableBrands, ORGANIZATION_BRANDING, getOrgId } from "../config/organizationBranding";
 import { demoConfig } from "../config/demo";
+import { defineMessages, useMessages } from "../i18n";
+
+const MESSAGES = defineMessages(
+  {
+    welcome: (customer: string) => `Welcome to the ${customer} portal`,
+    selectOrganization: "Select your organization to continue",
+    countries: (count: number) => `${count} countries`,
+    selectCountry: "Select your country",
+    backToBrands: "← Back to brands",
+    switchOrganization: "Switch organization",
+  },
+  {
+    welcome: (customer) => `Bienvenue sur le portail ${customer}`,
+    selectOrganization: "Sélectionnez votre organisation pour continuer",
+    countries: (count) => `${count} pays`,
+    selectCountry: "Sélectionnez votre pays",
+    backToBrands: "← Retour aux marques",
+    switchOrganization: "Changer d'organisation",
+  }
+);
 
 interface OrganizationPickerProps {
   /** Show as full-page picker vs inline component */
@@ -18,6 +38,7 @@ const OrganizationPicker: React.FC<OrganizationPickerProps> = ({
   showCountries = true,
 }) => {
   const { loginWithRedirect } = useAuth0();
+  const m = useMessages(MESSAGES);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [hoveredBrand, setHoveredBrand] = useState<string | null>(null);
 
@@ -162,10 +183,10 @@ const OrganizationPicker: React.FC<OrganizationPickerProps> = ({
       {fullPage && (
         <div style={headerStyle}>
           <h1 style={{ fontSize: "1.75rem", marginBottom: "0.5rem", color: "var(--text-primary)" }}>
-            Welcome to the {demoConfig.customer.name} portal
+            {m.welcome(demoConfig.customer.name)}
           </h1>
           <p style={{ color: "var(--text-muted)", fontSize: "1rem" }}>
-            Select your organization to continue
+            {m.selectOrganization}
           </p>
         </div>
       )}
@@ -191,7 +212,7 @@ const OrganizationPicker: React.FC<OrganizationPickerProps> = ({
               <div style={brandNameStyle}>{brand.name}</div>
               {brand.countries.length > 1 && (
                 <div style={countryBadgeStyle(brand.primaryColor)}>
-                  {brand.countries.length} countries
+                  {m.countries(brand.countries.length)}
                 </div>
               )}
             </div>
@@ -213,7 +234,7 @@ const OrganizationPicker: React.FC<OrganizationPickerProps> = ({
                 {selectedBrandData?.name}
               </h2>
               <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--text-muted)" }}>
-                Select your country
+                {m.selectCountry}
               </p>
             </div>
           </div>
@@ -239,7 +260,7 @@ const OrganizationPicker: React.FC<OrganizationPickerProps> = ({
           </div>
 
           <button style={backButtonStyle} onClick={() => setSelectedBrand(null)}>
-            ← Back to brands
+            {m.backToBrands}
           </button>
         </div>
       )}
@@ -257,6 +278,7 @@ export const OrganizationBadge: React.FC<{
   primaryColor?: string;
   onSwitch?: () => void;
 }> = ({ orgName, displayName, logoUrl, primaryColor = "#63b3ed", onSwitch }) => {
+  const m = useMessages(MESSAGES);
   const branding = ORGANIZATION_BRANDING[orgName];
   const name = displayName || branding?.displayName || orgName;
   const logo = logoUrl || branding?.logoUrl;
@@ -308,7 +330,7 @@ export const OrganizationBadge: React.FC<{
       )}
       <span style={nameStyle}>{name}</span>
       {onSwitch && (
-        <button style={switchBtnStyle} onClick={onSwitch} title="Switch organization">
+        <button style={switchBtnStyle} onClick={onSwitch} title={m.switchOrganization}>
           ⇄
         </button>
       )}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth0 } from "../auth";
 import { useTheme } from "../context/ThemeContext";
 import ApplicationTiles, { RoleAccessSummary } from "../components/ApplicationTiles";
 import {
@@ -10,6 +10,164 @@ import {
   ApplicationAccess,
 } from "../config/organizationBranding";
 import { demoConfig, findOrganization } from "../config/demo";
+import { defineMessages, useMessages } from "../i18n";
+
+const MESSAGES = defineMessages(
+  {
+    title: "Organizations & Branding",
+    noOrganizations: "No organization in the demo configuration: add some to the customer's tfvars file, apply Terraform and run",
+    intro:
+      "Multi-brand B2B CIAM architecture using Auth0 Organizations. Each organization has its own visual identity, and application access is controlled by roles within each organization.",
+    tabDemo: "🎨 Live Demo",
+    tabArchitecture: "🏗️ Architecture",
+    tabAccounts: "👤 Test Accounts",
+    step1Title: "Step 1: Select an Organization",
+    step1Text: "Click an organization to preview its theme. The login page uses the organization's logo and colors.",
+    primaryAndId: (color: string, id: string) => `Primary: ${color} · ID: ${id}`,
+    loginTo: (name: string) => `Login to ${name}`,
+    loginToWithRole: (name: string, role: string) => `Login to ${name} (${role})`,
+    step2Title: "Step 2: Role-Based Application Access",
+    step2Text: "Users see different applications based on their organization roles. Select roles to preview access:",
+    appDashboard: "Application Dashboard",
+    accessSummary: "Access Summary",
+    step3Title: "Step 3: Launch an Application",
+    step3Text:
+      "Click an accessible app tile above to select it, then authenticate into it scoped to the selected organization.",
+    rolesList: (roles: string) => `· Roles: ${roles}`,
+    launch: (name: string) => `Launch ${name} →`,
+    clearSelection: "Clear selection",
+    selectAppHint: "← Click an accessible app tile in Step 2 to select it",
+    multiOrgTitle: "Multi-Organization Users",
+    multiOrgText:
+      "The app passes the organization in the authorization request: the same user logs into each of their organizations in turn, with that organization's branding and roles.",
+    multiOrgUse: (email: string, count: number) => (
+      <>
+        Use <code>{email}</code>, member of {count} organizations.
+      </>
+    ),
+    modelTitle: "🏗️ The Model: 1 Organization per Brand",
+    modelText:
+      "Each Auth0 Organization = one brand (or brand and country). Applications are NOT separate organizations: they are scoped within the organization via roles.",
+    colOrganization: "Organization",
+    colAuth0Organization: "Auth0 Organization",
+    colMembers: "Members",
+    testAccountCount: (count: number) => `${count} test account(s)`,
+    decisionsTitle: "🔑 Key Design Decisions",
+    decisionOrgPerBrand: () => (
+      <>
+        <strong>One organization per brand</strong> (or per brand and country): the finest granularity at which
+        branding, language and support contact differ.
+      </>
+    ),
+    decisionAppsNotOrgs: (apps: string) => (
+      <>
+        <strong>Applications are NOT separate organizations.</strong> Access to {apps} is controlled by the user's roles
+        within the organization, not by which organization they are in.
+      </>
+    ),
+    decisionSingleDatabase: () => (
+      <>
+        <strong>A single Auth0 database connection serves all organizations.</strong> Users are stored once and added as
+        members to one or more organizations.
+      </>
+    ),
+    decisionUrlDriven: () => (
+      <>
+        <strong>The organization is URL-driven:</strong> the portal passes the <code>organization</code> parameter in
+        the authorization request, and Auth0 shows that organization's branded login page.
+      </>
+    ),
+    accountsTitle: "👤 Test Accounts",
+    accountsText: "Each account demonstrates a specific persona or access pattern. They share one password:",
+    passwordFromPresenter: "given by the presenter",
+    labelEmail: "Email:",
+    labelApplication: "Application:",
+    labelOrganizations: "Organizations:",
+    labelDae: "DAE:",
+    noTile: "no tile",
+    noAccess: "no access",
+    none: "none",
+  },
+  {
+    title: "Organisations et image de marque",
+    noOrganizations:
+      "Aucune organisation dans la configuration de la démo : ajoutez-en dans le fichier tfvars du client, appliquez Terraform puis lancez",
+    intro:
+      "Architecture CIAM B2B multimarque reposant sur Auth0 Organizations. Chaque organisation possède sa propre identité visuelle, et l'accès aux applications est contrôlé par les rôles au sein de chaque organisation.",
+    tabDemo: "🎨 Démo en direct",
+    tabArchitecture: "🏗️ Architecture",
+    tabAccounts: "👤 Comptes de test",
+    step1Title: "Étape 1 : sélectionnez une organisation",
+    step1Text:
+      "Cliquez sur une organisation pour prévisualiser son thème. La page de connexion reprend le logo et les couleurs de l'organisation.",
+    primaryAndId: (color, id) => `Couleur principale : ${color} · ID : ${id}`,
+    loginTo: (name) => `Se connecter à ${name}`,
+    loginToWithRole: (name, role) => `Se connecter à ${name} (${role})`,
+    step2Title: "Étape 2 : accès aux applications selon les rôles",
+    step2Text:
+      "Les utilisateurs voient des applications différentes selon leurs rôles dans l'organisation. Sélectionnez des rôles pour prévisualiser les accès :",
+    appDashboard: "Tableau de bord des applications",
+    accessSummary: "Récapitulatif des accès",
+    step3Title: "Étape 3 : lancez une application",
+    step3Text:
+      "Cliquez ci-dessus sur la tuile d'une application accessible pour la sélectionner, puis connectez-vous à celle-ci dans le contexte de l'organisation sélectionnée.",
+    rolesList: (roles) => `· Rôles : ${roles}`,
+    launch: (name) => `Lancer ${name} →`,
+    clearSelection: "Effacer la sélection",
+    selectAppHint: "← Cliquez sur la tuile d'une application accessible à l'étape 2 pour la sélectionner",
+    multiOrgTitle: "Utilisateurs multi-organisations",
+    multiOrgText:
+      "L'application transmet l'organisation dans la requête d'autorisation : le même utilisateur se connecte tour à tour à chacune de ses organisations, avec l'image de marque et les rôles propres à chacune.",
+    multiOrgUse: (email, count) => (
+      <>
+        Utilisez <code>{email}</code>, membre de {count} organisations.
+      </>
+    ),
+    modelTitle: "🏗️ Le modèle : 1 organisation par marque",
+    modelText:
+      "Chaque organisation Auth0 = une marque (ou une marque et un pays). Les applications ne sont PAS des organisations distinctes : leur accès est défini au sein de l'organisation, par les rôles.",
+    colOrganization: "Organisation",
+    colAuth0Organization: "Organisation Auth0",
+    colMembers: "Membres",
+    testAccountCount: (count) => `${count} compte(s) de test`,
+    decisionsTitle: "🔑 Principaux choix de conception",
+    decisionOrgPerBrand: () => (
+      <>
+        <strong>Une organisation par marque</strong> (ou par marque et pays) : le niveau le plus fin auquel l'image de
+        marque, la langue et le contact du support diffèrent.
+      </>
+    ),
+    decisionAppsNotOrgs: (apps) => (
+      <>
+        <strong>Les applications ne sont PAS des organisations distinctes.</strong> L'accès à {apps} est contrôlé par
+        les rôles de l'utilisateur au sein de l'organisation, et non par l'organisation à laquelle il appartient.
+      </>
+    ),
+    decisionSingleDatabase: () => (
+      <>
+        <strong>Une seule connexion de base de données Auth0 sert toutes les organisations.</strong> Les utilisateurs
+        sont enregistrés une seule fois et ajoutés comme membres d'une ou plusieurs organisations.
+      </>
+    ),
+    decisionUrlDriven: () => (
+      <>
+        <strong>L'organisation est pilotée par l'URL :</strong> le portail transmet le paramètre{" "}
+        <code>organization</code> dans la requête d'autorisation, et Auth0 affiche la page de connexion aux couleurs de
+        cette organisation.
+      </>
+    ),
+    accountsTitle: "👤 Comptes de test",
+    accountsText: "Chaque compte illustre un persona ou un modèle d'accès particulier. Ils partagent le même mot de passe :",
+    passwordFromPresenter: "communiqué par le présentateur",
+    labelEmail: "E-mail :",
+    labelApplication: "Application :",
+    labelOrganizations: "Organisations :",
+    labelDae: "DAE :",
+    noTile: "aucune tuile",
+    noAccess: "aucun accès",
+    none: "aucune",
+  }
+);
 
 const sectionStyle: React.CSSProperties = {
   background: "var(--bg-secondary)",
@@ -53,6 +211,7 @@ const appNames = (roles: string[]) =>
 const OrganizationPage: React.FC = () => {
   const { loginWithRedirect } = useAuth0();
   const { applyOrganizationTheme } = useTheme();
+  const m = useMessages(MESSAGES);
   const { organizations, testUsers, roles } = demoConfig;
   const [activeTab, setActiveTab] = useState<"demo" | "architecture" | "accounts">("demo");
   const [demoRoles, setDemoRoles] = useState<string[]>(roles[0] ? [roles[0].name] : []);
@@ -83,9 +242,9 @@ const OrganizationPage: React.FC = () => {
   if (organizations.length === 0) {
     return (
       <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        <h1>Organizations & Branding</h1>
+        <h1>{m.title}</h1>
         <p style={{ color: "var(--text-secondary)" }}>
-          No organization in the demo configuration: add some to the customer's tfvars file, apply Terraform and run
+          {m.noOrganizations}
           <code> npm run config</code>.
         </p>
       </div>
@@ -94,22 +253,21 @@ const OrganizationPage: React.FC = () => {
 
   return (
     <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-      <h1>Organizations & Branding</h1>
+      <h1>{m.title}</h1>
       <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>
-        Multi-brand B2B CIAM architecture using Auth0 Organizations.
-        Each organization has its own visual identity, and application access is controlled by roles within each organization.
+        {m.intro}
       </p>
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
         <button style={tabStyle(activeTab === "demo", primaryColor)} onClick={() => setActiveTab("demo")}>
-          🎨 Live Demo
+          {m.tabDemo}
         </button>
         <button style={tabStyle(activeTab === "architecture", primaryColor)} onClick={() => setActiveTab("architecture")}>
-          🏗️ Architecture
+          {m.tabArchitecture}
         </button>
         <button style={tabStyle(activeTab === "accounts", primaryColor)} onClick={() => setActiveTab("accounts")}>
-          👤 Test Accounts
+          {m.tabAccounts}
         </button>
       </div>
 
@@ -118,9 +276,9 @@ const OrganizationPage: React.FC = () => {
         <>
           {/* Organization Selection */}
           <div style={sectionStyle}>
-            <h2 style={{ marginTop: 0 }}>Step 1: Select an Organization</h2>
+            <h2 style={{ marginTop: 0 }}>{m.step1Title}</h2>
             <p style={{ color: "var(--text-muted)", marginBottom: "1rem" }}>
-              Click an organization to preview its theme. The login page uses the organization's logo and colors.
+              {m.step1Text}
             </p>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
@@ -160,14 +318,14 @@ const OrganizationPage: React.FC = () => {
                   <div>
                     <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>{selectedBranding.displayName}</div>
                     <div style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
-                      Primary: {selectedBranding.theme.primaryColor} · ID: {getOrgId(selectedOrgForDemo)}
+                      {m.primaryAndId(selectedBranding.theme.primaryColor, getOrgId(selectedOrgForDemo))}
                     </div>
                   </div>
                   <button
                     style={{ ...orgButtonStyle(primaryColor), marginLeft: "auto", padding: "0.6rem 1.2rem", fontWeight: 600 }}
                     onClick={() => handleBrandedLogin(selectedOrgForDemo)}
                   >
-                    Login to {selectedBranding.displayName}
+                    {m.loginTo(selectedBranding.displayName)}
                   </button>
                 </div>
               </div>
@@ -176,9 +334,9 @@ const OrganizationPage: React.FC = () => {
 
           {/* Role-Based Access Demo */}
           <div style={sectionStyle}>
-            <h2 style={{ marginTop: 0 }}>Step 2: Role-Based Application Access</h2>
+            <h2 style={{ marginTop: 0 }}>{m.step2Title}</h2>
             <p style={{ color: "var(--text-muted)", marginBottom: "1rem" }}>
-              Users see different applications based on their organization roles. Select roles to preview access:
+              {m.step2Text}
             </p>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.5rem" }}>
@@ -209,7 +367,7 @@ const OrganizationPage: React.FC = () => {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "1.5rem" }}>
               <div>
                 <h4 style={{ marginTop: 0, marginBottom: "1rem", color: "var(--text-primary)" }}>
-                  Application Dashboard
+                  {m.appDashboard}
                 </h4>
                 <ApplicationTiles
                   roles={demoRoles}
@@ -220,7 +378,7 @@ const OrganizationPage: React.FC = () => {
               </div>
               <div>
                 <h4 style={{ marginTop: 0, marginBottom: "1rem", color: "var(--text-primary)" }}>
-                  Access Summary
+                  {m.accessSummary}
                 </h4>
                 <RoleAccessSummary roles={demoRoles} primaryColor={primaryColor} />
               </div>
@@ -229,9 +387,9 @@ const OrganizationPage: React.FC = () => {
 
           {/* Step 3: Launch App */}
           <div style={sectionStyle}>
-            <h2 style={{ marginTop: 0 }}>Step 3: Launch an Application</h2>
+            <h2 style={{ marginTop: 0 }}>{m.step3Title}</h2>
             <p style={{ color: "var(--text-muted)", marginBottom: "1rem" }}>
-              Click an accessible app tile above to select it, then authenticate into it scoped to the selected organization.
+              {m.step3Text}
             </p>
 
             {selectedApp ? (
@@ -253,7 +411,7 @@ const OrganizationPage: React.FC = () => {
                     <span style={{ background: primaryColor + "20", color: primaryColor, padding: "0.15rem 0.5rem", borderRadius: "4px", fontWeight: 500 }}>
                       {selectedBranding?.displayName || selectedOrgForDemo}
                     </span>
-                    {" "}· Roles: {demoRoles.join(", ")}
+                    {" "}{m.rolesList(demoRoles.join(", "))}
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "flex-end" }}>
@@ -261,13 +419,13 @@ const OrganizationPage: React.FC = () => {
                     style={{ ...orgButtonStyle(primaryColor), padding: "0.7rem 1.4rem", fontWeight: 600, fontSize: "0.95rem", whiteSpace: "nowrap" }}
                     onClick={() => handleBrandedLogin(selectedOrgForDemo)}
                   >
-                    Launch {selectedApp.name} →
+                    {m.launch(selectedApp.name)}
                   </button>
                   <button
                     style={{ background: "transparent", color: "var(--text-muted)", border: "none", fontSize: "0.8rem", cursor: "pointer", padding: "0.25rem" }}
                     onClick={() => setSelectedApp(null)}
                   >
-                    Clear selection
+                    {m.clearSelection}
                   </button>
                 </div>
               </div>
@@ -281,7 +439,7 @@ const OrganizationPage: React.FC = () => {
                 color: "var(--text-muted)",
                 fontSize: "0.9rem",
               }}>
-                ← Click an accessible app tile in Step 2 to select it
+                {m.selectAppHint}
               </div>
             )}
           </div>
@@ -289,27 +447,26 @@ const OrganizationPage: React.FC = () => {
           {/* Multi-Org User Demo */}
           {multiOrgUser && (
             <div style={sectionStyle}>
-              <h2 style={{ marginTop: 0 }}>Multi-Organization Users</h2>
+              <h2 style={{ marginTop: 0 }}>{m.multiOrgTitle}</h2>
               <p style={{ color: "var(--text-muted)", marginBottom: "1rem" }}>
-                The app passes the organization in the authorization request: the same user logs into each of their
-                organizations in turn, with that organization's branding and roles.
+                {m.multiOrgText}
               </p>
               <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                {multiOrgUser.memberships.map((m) => {
-                  const org = findOrganization(m.organization);
+                {multiOrgUser.memberships.map((membership) => {
+                  const org = findOrganization(membership.organization);
                   return (
                     <button
-                      key={m.organization}
+                      key={membership.organization}
                       style={orgButtonStyle(org?.primaryColor || primaryColor)}
-                      onClick={() => handleBrandedLogin(m.organization)}
+                      onClick={() => handleBrandedLogin(membership.organization)}
                     >
-                      Login to {org?.displayName || m.organization} ({m.role})
+                      {m.loginToWithRole(org?.displayName || membership.organization, membership.role)}
                     </button>
                   );
                 })}
               </div>
               <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "0.75rem" }}>
-                Use <code>{multiOrgUser.email}</code>, member of {multiOrgUser.memberships.length} organizations.
+                {m.multiOrgUse(multiOrgUser.email, multiOrgUser.memberships.length)}
               </p>
             </div>
           )}
@@ -320,10 +477,9 @@ const OrganizationPage: React.FC = () => {
       {activeTab === "architecture" && (
         <>
           <div style={sectionStyle}>
-            <h2 style={{ marginTop: 0 }}>🏗️ The Model: 1 Organization per Brand</h2>
+            <h2 style={{ marginTop: 0 }}>{m.modelTitle}</h2>
             <p style={{ color: "var(--text-secondary)" }}>
-              Each Auth0 Organization = one brand (or brand and country). Applications are NOT separate organizations:
-              they are scoped within the organization via roles.
+              {m.modelText}
             </p>
 
             <hr style={dividerStyle} />
@@ -332,9 +488,9 @@ const OrganizationPage: React.FC = () => {
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
                 <thead>
                   <tr style={{ background: "var(--bg-primary)" }}>
-                    <th style={{ padding: "0.75rem", textAlign: "left", color: "var(--text-primary)" }}>Organization</th>
-                    <th style={{ padding: "0.75rem", textAlign: "left", color: "var(--text-primary)" }}>Auth0 Organization</th>
-                    <th style={{ padding: "0.75rem", textAlign: "left", color: "var(--text-primary)" }}>Members</th>
+                    <th style={{ padding: "0.75rem", textAlign: "left", color: "var(--text-primary)" }}>{m.colOrganization}</th>
+                    <th style={{ padding: "0.75rem", textAlign: "left", color: "var(--text-primary)" }}>{m.colAuth0Organization}</th>
+                    <th style={{ padding: "0.75rem", textAlign: "left", color: "var(--text-primary)" }}>{m.colMembers}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -345,7 +501,7 @@ const OrganizationPage: React.FC = () => {
                         <code style={{ fontSize: "0.8rem" }}>{org.name} · {org.id}</code>
                       </td>
                       <td style={{ padding: "0.75rem", color: "var(--text-secondary)" }}>
-                        {testUsers.filter((user) => user.memberships.some((m) => m.organization === org.name)).length} test account(s)
+                        {m.testAccountCount(testUsers.filter((user) => user.memberships.some((membership) => membership.organization === org.name)).length)}
                       </td>
                     </tr>
                   ))}
@@ -355,25 +511,12 @@ const OrganizationPage: React.FC = () => {
           </div>
 
           <div style={sectionStyle}>
-            <h2 style={{ marginTop: 0 }}>🔑 Key Design Decisions</h2>
+            <h2 style={{ marginTop: 0 }}>{m.decisionsTitle}</h2>
             <ul style={{ color: "var(--text-secondary)", lineHeight: 1.8 }}>
-              <li>
-                <strong>One organization per brand</strong> (or per brand and country): the finest granularity at
-                which branding, language and support contact differ.
-              </li>
-              <li>
-                <strong>Applications are NOT separate organizations.</strong> Access to{" "}
-                {Object.values(APPLICATIONS).map((app) => app.name).join(", ")} is controlled by the user's roles within
-                the organization, not by which organization they are in.
-              </li>
-              <li>
-                <strong>A single Auth0 database connection serves all organizations.</strong> Users are stored once
-                and added as members to one or more organizations.
-              </li>
-              <li>
-                <strong>The organization is URL-driven:</strong> the portal passes the <code>organization</code>
-                parameter in the authorization request, and Auth0 shows that organization's branded login page.
-              </li>
+              <li>{m.decisionOrgPerBrand()}</li>
+              <li>{m.decisionAppsNotOrgs(Object.values(APPLICATIONS).map((app) => app.name).join(", "))}</li>
+              <li>{m.decisionSingleDatabase()}</li>
+              <li>{m.decisionUrlDriven()}</li>
             </ul>
           </div>
         </>
@@ -382,10 +525,10 @@ const OrganizationPage: React.FC = () => {
       {/* ACCOUNTS TAB */}
       {activeTab === "accounts" && (
         <div style={sectionStyle}>
-          <h2 style={{ marginTop: 0 }}>👤 Test Accounts</h2>
+          <h2 style={{ marginTop: 0 }}>{m.accountsTitle}</h2>
           <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>
-            Each account demonstrates a specific persona or access pattern. They share one password:{" "}
-            <code>{demoConfig.testUsersPassword || "given by the presenter"}</code>
+            {m.accountsText}{" "}
+            <code>{demoConfig.testUsersPassword || m.passwordFromPresenter}</code>
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1rem" }}>
@@ -399,29 +542,29 @@ const OrganizationPage: React.FC = () => {
                     <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>{user.description}</div>
                   )}
                   <div style={{ fontFamily: "monospace", fontSize: "0.85rem", background: "var(--bg-secondary)", padding: "0.75rem", borderRadius: "6px", marginTop: "0.75rem" }}>
-                    <div><span style={{ color: "var(--text-muted)" }}>Email:</span> <span style={{ color: "var(--text-primary)" }}>{user.email}</span></div>
+                    <div><span style={{ color: "var(--text-muted)" }}>{m.labelEmail}</span> <span style={{ color: "var(--text-primary)" }}>{user.email}</span></div>
                     <div>
-                      <span style={{ color: "var(--text-muted)" }}>Application:</span>{" "}
+                      <span style={{ color: "var(--text-muted)" }}>{m.labelApplication}</span>{" "}
                       <span style={{ color: "var(--text-secondary)" }}>
-                        {user.roles.length > 0 ? `${user.roles.join(", ")} → ${appNames(user.roles).join(", ") || "no tile"}` : "no access"}
+                        {user.roles.length > 0 ? `${user.roles.join(", ")} → ${appNames(user.roles).join(", ") || m.noTile}` : m.noAccess}
                       </span>
                     </div>
                     <div>
-                      <span style={{ color: "var(--text-muted)" }}>Organizations:</span>{" "}
+                      <span style={{ color: "var(--text-muted)" }}>{m.labelOrganizations}</span>{" "}
                       <span style={{ color: "var(--text-secondary)" }}>
-                        {user.memberships.map((m) => `${m.organization} (${m.role})`).join(", ") || "none"}
+                        {user.memberships.map((membership) => `${membership.organization} (${membership.role})`).join(", ") || m.none}
                       </span>
                     </div>
                     {user.daeRole && (
-                      <div><span style={{ color: "var(--text-muted)" }}>DAE:</span> <span style={{ color: "var(--text-secondary)" }}>{user.daeRole}</span></div>
+                      <div><span style={{ color: "var(--text-muted)" }}>{m.labelDae}</span> <span style={{ color: "var(--text-secondary)" }}>{user.daeRole}</span></div>
                     )}
                   </div>
                   <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
-                    {user.memberships.map((m) => {
-                      const org = findOrganization(m.organization);
+                    {user.memberships.map((membership) => {
+                      const org = findOrganization(membership.organization);
                       return (
-                        <button key={m.organization} style={orgButtonStyle(org?.primaryColor || color)} onClick={() => handleBrandedLogin(m.organization)}>
-                          Login to {org?.displayName || m.organization}
+                        <button key={membership.organization} style={orgButtonStyle(org?.primaryColor || color)} onClick={() => handleBrandedLogin(membership.organization)}>
+                          {m.loginTo(org?.displayName || membership.organization)}
                         </button>
                       );
                     })}
