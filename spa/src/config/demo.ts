@@ -45,6 +45,9 @@ export interface DemoConfig {
     pageBackgroundColor: string;
   };
   auth0: { domain: string; clientId: string; audience: string };
+  // Portal application (Terraform app_name), prefix of its roles; missing
+  // from a demo.json generated before it was exported
+  appName?: string;
   claimsNamespace: string;
   connections: { database: string; passwordless: string | null };
   organizations: DemoOrganization[];

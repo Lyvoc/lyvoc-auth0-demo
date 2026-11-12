@@ -20,6 +20,8 @@ output "demo_config" {
       clientId = auth0_client.spa.client_id
       audience = auth0_resource_server.api.identifier
     }
+    # Name of the portal application, prefix of its roles ("<appName>:<role>")
+    appName         = local.app_name
     claimsNamespace = local.claims_namespace
     connections = {
       database     = data.auth0_connection.users.name
