@@ -2,7 +2,9 @@
  * DAE Settings Query Hook: the dashboard and the user forms of the delegated
  * admin.
  *
- * - Users are created in the tenant's users database only.
+ * - Users are created in the tenant's users database only, by an admin of
+ *   at least one organization (organization role "admin", read live from
+ *   Auth0) who is not an Auditor.
  * - Create form: organization (Memberships Query Hook), organization role
  *   (member, admin), application role (the roles of the admin's applications,
  *   read from Auth0), DAE role (never above the admin's own).
@@ -19,6 +21,8 @@ function (ctx, callback) {
   var CLIENT_ID = '__CLIENT_ID__';
   var CLIENT_SECRET = '__CLIENT_SECRET__';
   var USERS_CONNECTION = '__USERS_CONNECTION__';
+  // Organization role giving the right to manage the organization's users
+  var MANAGER_ORG_ROLE = 'admin';
 
   // DAE roles from the least to the most powerful
   var DAE_ROLES = [
@@ -53,6 +57,29 @@ function (ctx, callback) {
     }).then(function (body) { return body.access_token; });
   }
 
+  var token;
+  function api(method, path) {
+    return call({
+      method: method,
+      url: 'https://' + DOMAIN + '/api/v2' + path,
+      headers: { Authorization: 'Bearer ' + token },
+      json: true
+    });
+  }
+
+  // Names of the organizations where the user holds MANAGER_ORG_ROLE (live):
+  // the ones whose users they manage; where they are "member", read-only
+  function managedOrganizations(userId) {
+    var id = encodeURIComponent(userId);
+    return api('GET', '/users/' + id + '/organizations?per_page=100').then(function (orgs) {
+      return Promise.all(orgs.map(function (org) {
+        return api('GET', '/organizations/' + org.id + '/members/' + id + '/roles?per_page=100').then(function (roles) {
+          return roles.some(function (role) { return role.name === MANAGER_ORG_ROLE; }) ? org.name : null;
+        });
+      }));
+    }).then(function (names) { return names.filter(Boolean); });
+  }
+
   var admin = ctx.request.user || {};
   var meta = admin.app_metadata || {};
   var organizations = Array.isArray(meta.organizations) ? meta.organizations : [];
@@ -85,15 +112,13 @@ function (ctx, callback) {
   }).toString();
 
   getToken()
-    .then(function (token) {
-      return call({
-        method: 'GET',
-        url: 'https://' + DOMAIN + '/api/v2/roles?per_page=100',
-        headers: { Authorization: 'Bearer ' + token },
-        json: true
-      });
+    .then(function (accessToken) {
+      token = accessToken;
+      return Promise.all([api('GET', '/roles?per_page=100'), managedOrganizations(admin.user_id || admin.sub)]);
     })
-    .then(function (roles) {
+    .then(function (results) {
+      var roles = results[0];
+      var managed = results[1];
       // Application roles: "<application>:<role>", for the admin's applications
       var appRoleOptions = [{ value: '', label: 'No application role' }].concat(
         roles
@@ -112,7 +137,7 @@ function (ctx, callback) {
           memberships: 'Organization',
           menuName: admin.name
         },
-        canCreateUser: organizations.length > 0 && meta.dae_role !== 'Delegated Admin - Auditor',
+        canCreateUser: managed.length > 0 && meta.dae_role !== 'Delegated Admin - Auditor',
         userFields: [
           {
             property: 'app_metadata.organizations',
@@ -133,9 +158,12 @@ function (ctx, callback) {
           // One InputSelectCombo only: its options load through react-select's
           // Async cache, shared by every InputSelectCombo of the form (a second
           // one would show the first one's options). The others: InputCombo
+          // The DAE hides its Organization field when the admin manages a
+          // single organization: named here, so the dialog says where the
+          // user is created
           {
             property: 'app_metadata.org_role',
-            label: 'Organization role',
+            label: managed.length === 1 ? 'Organization role in ' + managed[0] : 'Organization role',
             display: false,
             create: { type: 'select', component: 'InputCombo', options: orgRoleOptions, required: true },
             edit: false

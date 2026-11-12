@@ -14,9 +14,10 @@ Password: shown on the portal's welcome page (`Test123456*` on demo-lyvoc).
 
 | Account | Organizations | Application role | Used for |
 |---|---|---|---|
-| `acme-admin@example.com` | Acme France (admin) | admin | Full access, step-up MFA, DAE administrator |
-| `acme-customer@example.com` | Acme France (member) | b2b_customer | Organization login, single sign-on |
-| `acme-multi@example.com` | Acme France (member), Acme Spain (admin) | buyer | One user, several organizations |
+| `acme-admin@example.com` | Acme France (admin) | admin | Full access, step-up MFA, DAE Administrator |
+| `acme-customer@example.com` | Acme France (member) | b2b_customer | Organization login, single sign-on, DAE Auditor (read-only) |
+| `acme-dae-user@example.com` | Acme France (admin) | b2b_customer | DAE User (users only) |
+| `acme-multi@example.com` | Acme France (member), Acme Spain (admin) | buyer | One user, several organizations; DAE Operator: manages Spain, reads France |
 | `acme-direct` (real mailbox) | none | buyer | Application access without organization, passwordless login |
 | `acme-no-app@example.com` | Acme Spain (member) | none | Organization member denied |
 
@@ -109,6 +110,11 @@ Run `terraform apply` afterwards: it puts the test accounts back.
 | 6.3 Its login | Portal, **Log In to Acme France** with the new account | `app_roles: ["buyer"]`, `org_roles: ["member"]` |
 | 6.4 Change a role | The user, **Actions > Change Profile**: application role `Acme Portal:b2b_customer` | The list shows the new role |
 | 6.5 Delete | The user, **Actions > Delete** | The user is gone |
+| 6.6 Rights per organization | Log out of the DAE, log in as `acme-multi@example.com`. Open a user of each organization, try **Actions > Block**, then **Create User** | Both organizations listed. Acme France: read-only ("Read-only: you are not an admin of this user's organizations."). Acme Spain: the actions work. **Create User**: no Organization field (a single organization managed), the field reads "Organization role in acme-spain", and the new user is listed in `acme-spain` |
+| 6.7 DAE roles | Log in as `acme-dae-user@example.com`, then `acme-multi@example.com`, then `acme-admin@example.com` | User: users only. Operator: users and **Logs**. Administrator: also **Configuration** (hooks), in the menu under the name |
+| 6.8 Auditor: read-only | Log in as `acme-customer@example.com` | The users of Acme France are listed and can be opened, without **Create User**; any action is refused ("Auditors have read-only access.") |
+
+The rights inside an organization follow the organization role: a DAE role manages the users of the organizations where the account is `admin`, and only reads the ones where it is `member` (see [dae-hooks/README.md](../dae-hooks/README.md#rights-per-organization)).
 
 **Talking point**: the DAE does the job with Auth0's own tool (no success message, the list needs a refresh after a creation); the Admin UI covers the same needs with a richer experience (notifications, applications, invitations, logs).
 

@@ -11,8 +11,10 @@
  * UPDATE ("Change Profile"): replaces the application role and the DAE role,
  * then rebuilds the app_metadata role cache.
  *
- * The admin only creates users in their own organizations, and never gives a
- * DAE role above their own. Role and organization IDs are looked up by name:
+ * The admin only creates and changes users in the organizations where they
+ * hold the organization role "admin" (read live from Auth0; where they are
+ * "member": read-only), is not an Auditor, and never gives a DAE role above
+ * their own. Role and organization IDs are looked up by name:
  * no customer-specific value, the same hook serves every customer.
  *
  * Template: `npm run config` writes the version to paste, with the Management
@@ -33,6 +35,8 @@ function (ctx, callback) {
     'Delegated Admin - Administrator'
   ];
   var ORG_ROLES = ['member', 'admin'];
+  // Organization role giving the right to manage the organization's users
+  var MANAGER_ORG_ROLE = 'admin';
 
   var token;
 
@@ -81,6 +85,19 @@ function (ctx, callback) {
       if (!role) throw new Error('Unknown role: ' + name);
       return role;
     });
+  }
+
+  // Names of the organizations where the user holds MANAGER_ORG_ROLE (live):
+  // the ones whose users they manage; where they are "member", read-only
+  function managedOrganizations(userId) {
+    var id = encodeURIComponent(userId);
+    return api('GET', '/users/' + id + '/organizations?per_page=100').then(function (orgs) {
+      return Promise.all(orgs.map(function (org) {
+        return api('GET', '/organizations/' + org.id + '/members/' + id + '/roles?per_page=100').then(function (roles) {
+          return roles.some(function (role) { return role.name === MANAGER_ORG_ROLE; }) ? org.name : null;
+        });
+      }));
+    }).then(function (names) { return names.filter(Boolean); });
   }
 
   // app_metadata cache of the role assignments, rebuilt from Auth0 like the
@@ -139,6 +156,12 @@ function (ctx, callback) {
   var adminApps = Array.isArray(adminMeta.apps) ? adminMeta.apps : [];
   var adminLevel = DAE_ROLES.indexOf(adminMeta.dae_role);
 
+  var adminId = admin.user_id || admin.sub;
+
+  if (adminMeta.dae_role === 'Delegated Admin - Auditor') {
+    return callback(new Error('Auditors have read-only access.'));
+  }
+
   var fields = ctx.payload.app_metadata || {};
   var appRole = valueOf(fields.app_role);
   var daeRole = valueOf(fields.dae_role);
@@ -156,28 +179,34 @@ function (ctx, callback) {
   var isDaeRole = function (name) { return DAE_ROLES.indexOf(name) !== -1; };
 
   if (ctx.method === 'create') {
-    var organization = (ctx.payload.memberships && ctx.payload.memberships[0]) || adminOrganizations[0];
-    if (adminOrganizations.indexOf(organization) === -1) {
-      return callback(new Error('You can only create users in your organizations.'));
-    }
     if (ORG_ROLES.indexOf(orgRole) === -1) {
       return callback(new Error('Unknown organization role: ' + orgRole));
     }
 
-    // Created by the DAE; the "<Customer> - DAE assignment" Action
-    // (post-user-registration) adds the membership and the roles left in
-    // dae_pending. organizations: listed by the Filter Hook right away.
-    return callback(null, {
-      email: ctx.payload.email,
-      password: ctx.payload.password,
-      connection: USERS_CONNECTION,
-      user_metadata: ctx.payload.user_metadata || {},
-      app_metadata: {
-        organizations: [organization],
-        dae_role: daeRole || undefined,
-        dae_pending: { organization: organization, org_role: orgRole, app_role: appRole, dae_role: daeRole }
-      }
-    });
+    return getToken()
+      .then(function () { return managedOrganizations(adminId); })
+      .then(function (managed) {
+        var organization = (ctx.payload.memberships && ctx.payload.memberships[0]) || managed[0];
+        if (!organization || managed.indexOf(organization) === -1) {
+          return callback(new Error('You can only create users in the organizations you are an admin of.'));
+        }
+
+        // Created by the DAE; the "<Customer> - DAE assignment" Action
+        // (post-user-registration) adds the membership and the roles left in
+        // dae_pending. organizations: listed by the Filter Hook right away.
+        callback(null, {
+          email: ctx.payload.email,
+          password: ctx.payload.password,
+          connection: USERS_CONNECTION,
+          user_metadata: ctx.payload.user_metadata || {},
+          app_metadata: {
+            organizations: [organization],
+            dae_role: daeRole || undefined,
+            dae_pending: { organization: organization, org_role: orgRole, app_role: appRole, dae_role: daeRole }
+          }
+        });
+      })
+      .catch(function (err) { callback(err); });
   }
 
   if (ctx.method === 'update') {
@@ -191,6 +220,17 @@ function (ctx, callback) {
     }
 
     return getToken()
+      .then(function () {
+        return Promise.all([
+          managedOrganizations(adminId),
+          api('GET', '/users/' + encodeURIComponent(original.user_id) + '/organizations?per_page=100')
+        ]);
+      })
+      .then(function (results) {
+        var managed = results[0];
+        var allowed = results[1].some(function (org) { return managed.indexOf(org.name) !== -1; });
+        if (!allowed) throw new Error('Read-only: you are not an admin of this user\'s organizations.');
+      })
       .then(function () { return replaceDirectRole(original.user_id, isAppRole, appRole); })
       .then(function () { return replaceDirectRole(original.user_id, isDaeRole, daeRole); })
       .then(function () { return syncRoleMetadata(original.user_id); })

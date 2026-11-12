@@ -40,16 +40,27 @@ test_users = {
     app_metadata  = { dae_role = "Delegated Admin - Administrator" }
   }
   acme-customer = {
-    description   = "Organization member, B2B customer of the application"
+    description   = "Organization member, B2B customer of the application, DAE auditor (read-only)"
     name          = "Acme Customer"
     organizations = { acme-france = "member" }
     roles         = ["b2b_customer"]
+    app_metadata  = { dae_role = "Delegated Admin - Auditor" }
+  }
+  # DAE: manages the users of Acme France (organization admin), the users
+  # section only (no logs, no configuration)
+  acme-dae-user = {
+    description   = "Organization admin, B2B customer of the application, DAE user (users only)"
+    name          = "Acme DAE User"
+    organizations = { acme-france = "admin" }
+    roles         = ["b2b_customer"]
+    app_metadata  = { dae_role = "Delegated Admin - User" }
   }
   acme-multi = {
-    description   = "Two organizations with different roles, buyer of the application"
+    description   = "Two organizations with different roles, buyer of the application, DAE operator: manages Acme Spain, reads Acme France"
     name          = "Acme Multi-organization Buyer"
     organizations = { acme-france = "member", acme-spain = "admin" }
     roles         = ["buyer"]
+    app_metadata  = { dae_role = "Delegated Admin - Operator" }
     # Interface language (the others: test_users_locale, "en" by default)
     locale = "fr"
   }
