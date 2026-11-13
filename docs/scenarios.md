@@ -5,7 +5,7 @@ Scenarios to present the demo to a prospect, and to check it before a session. E
 ## Before the demo
 
 1. Prepare the customer and start the applications ([README](../README.md#prepare-a-demo-for-a-prospect)): `terraform apply`, `npm run config`, `npm run dev` (portal, http://localhost:8080), `npm run web` (web application, http://localhost:3000).
-2. **Reset the test accounts**: `terraform apply` again puts back their password, roles and organizations, even after changes made during a previous demo.
+2. **Reset the test accounts**: `terraform apply` again puts back their password, roles and organizations and unblocks them, even after changes made during a previous demo.
 3. Log out of the portal, the web application, the Admin UI and the DAE; for a clean run, use a private browser window.
 
 ### Test accounts (Acme)
@@ -120,5 +120,5 @@ The rights inside an organization follow the organization role: a DAE role manag
 
 ## After the demo
 
-- `terraform apply`: test accounts back to their password, roles and organizations.
+- `terraform apply`: test accounts back to their password, roles and organizations, unblocked.
 - Delete the accounts created during the demo (Admin UI or DAE): Terraform does not manage them.

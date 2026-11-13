@@ -56,16 +56,19 @@ resource "auth0_user" "test" {
   email_verified  = true
   # Reset to the shared password at every apply, even if changed during a demo
   password = local.test_users_password
+  # Unblocked at every apply, even if blocked during a demo (Admin UI, DAE);
+  # left unset, the provider would never send it
+  blocked = false
 
   # Reset at every apply with the memberships, like the password
-  app_metadata = jsonencode(merge(
-    each.value.app_metadata,
-    local.test_users_locale[each.key] != "" ? { locale = local.test_users_locale[each.key] } : {},
-    local.test_users_role_metadata[each.key],
-  ))
+  app_metadata = jsonencode(merge(each.value.app_metadata, local.test_users_role_metadata[each.key]))
+
+  # Interface language (user_metadata.locale: the user's own choice, changed
+  # by the Admin UI's language switcher), reset at every apply like the rest
+  # of the account; profile changes made during a demo are dropped too
+  user_metadata = jsonencode(local.test_users_locale[each.key] != "" ? { locale = local.test_users_locale[each.key] } : {})
 
   lifecycle {
-    ignore_changes       = [user_metadata]
     replace_triggered_by = [terraform_data.users_connection]
   }
 }

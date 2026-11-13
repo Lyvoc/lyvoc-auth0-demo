@@ -59,7 +59,7 @@ To switch the portal to another customer: `terraform workspace select <customer>
 | `acme-direct` | none | buyer | Application access without organization; passwordless login (real mailbox) |
 | `acme-no-app` | Acme Spain (member) | none | Organization member without application access: denied |
 
-Generic addresses (`<alias>@example.com`, receiving nothing), except the accounts with `receives_emails`: a real mailbox, set in the credentials file. Every `terraform apply` resets the accounts (password, roles, organizations), even after changes made during a demo.
+Generic addresses (`<alias>@example.com`, receiving nothing), except the accounts with `receives_emails`: a real mailbox, set in the credentials file. Every `terraform apply` resets the accounts (password, roles, organizations, unblocked), even after changes made during a demo.
 
 ## Customizing the portal live
 

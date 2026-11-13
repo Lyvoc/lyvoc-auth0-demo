@@ -143,8 +143,8 @@ const MESSAGES = defineMessages(
     ),
     beforeReset: (
       <>
-        <B>Reset the test accounts</B>: <C>terraform apply</C> again puts back their password, roles and organizations,
-        even after changes made during a previous demo.
+        <B>Reset the test accounts</B>: <C>terraform apply</C> again puts back their password, roles and organizations
+        and unblocks them, even after changes made during a previous demo.
       </>
     ),
     beforeLogout:
@@ -419,7 +419,7 @@ const MESSAGES = defineMessages(
     afterTab: "After the demo",
     afterReset: (
       <>
-        <C>terraform apply</C>: test accounts back to their password, roles and organizations.
+        <C>terraform apply</C>: test accounts back to their password, roles and organizations, unblocked.
       </>
     ),
     afterDelete: "Delete the accounts created during the demo (Admin UI or DAE): Terraform does not manage them.",
@@ -464,7 +464,7 @@ const MESSAGES = defineMessages(
     beforeReset: (
       <>
         <B>Réinitialiser les comptes de test</B> : relancer <C>terraform apply</C> leur rend leur mot de passe, leurs
-        rôles et leurs organisations, même après des modifications faites lors d'une démo précédente.
+        rôles et leurs organisations et les débloque, même après des modifications faites lors d'une démo précédente.
       </>
     ),
     beforeLogout:
@@ -744,7 +744,7 @@ const MESSAGES = defineMessages(
     afterTab: "Après la démo",
     afterReset: (
       <>
-        <C>terraform apply</C> : les comptes de test retrouvent leur mot de passe, leurs rôles et leurs organisations.
+        <C>terraform apply</C> : les comptes de test retrouvent leur mot de passe, leurs rôles et leurs organisations, et sont débloqués.
       </>
     ),
     afterDelete: "Supprimer les comptes créés pendant la démo (Admin UI ou DAE) : Terraform ne les gère pas.",
