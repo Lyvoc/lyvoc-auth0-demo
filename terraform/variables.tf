@@ -162,7 +162,7 @@ variable "test_users" {
     organizations = optional(map(string), {})
     roles         = optional(list(string), [])
     app_metadata  = optional(map(string), {})
-    # Interface language (app_metadata.locale): "en" or "fr", the languages
+    # Interface language (user_metadata.locale): "en" or "fr", the languages
     # of the Admin UI. Default: test_users_locale
     locale = optional(string)
     # Real mailbox (test_users_email_template) and passwordless login: for
@@ -197,7 +197,7 @@ variable "test_users" {
 }
 
 variable "test_users_locale" {
-  description = "Interface language of the test accounts without their own locale (app_metadata.locale, read by the Admin UI and the applications): \"en\", \"fr\", or \"\" for none. Reset at every apply, like the rest of app_metadata."
+  description = "Interface language of the test accounts without their own locale (user_metadata.locale, read by the Admin UI and the applications): \"en\", \"fr\", or \"\" for none. Reset at every apply, like the rest of the account."
   type        = string
   default     = "en"
 
