@@ -77,3 +77,13 @@ test_users = {
     organizations = { acme-spain = "member" }
   }
 }
+
+# Tenant-wide login of demo-lyvoc, managed by this workspace only: domain
+# detection, @lyvoc.com to the Admin UI's Okta (connection created from the
+# Admin UI, Admin team > SSO)
+tenant_login = {
+  identifier_first = true
+  domain_connections = {
+    "admin-ui-okta" = ["lyvoc.com"]
+  }
+}

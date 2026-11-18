@@ -278,3 +278,17 @@ variable "admin_ui_url" {
   type        = string
   default     = ""
 }
+
+variable "tenant_login" {
+  description = "Tenant-wide login settings, set in ONE workspace of the tenant only (null in the others: they would fight over them). identifier_first: the email first, then the password (required by domain detection). domain_connections: domain detection, connection name => email domains sent straight to it (only its domains are set, never its other options; the connection must exist, e.g. the Admin UI's Okta created from Admin team > SSO)."
+  type = object({
+    identifier_first   = optional(bool, true)
+    domain_connections = optional(map(list(string)), {})
+  })
+  default = null
+
+  validation {
+    condition     = var.tenant_login == null || alltrue(flatten([for domains in values(var.tenant_login.domain_connections) : [for d in domains : can(regex("^[a-z0-9.-]+\\.[a-z]{2,}$", d))]]))
+    error_message = "tenant_login.domain_connections: domains in lowercase, e.g. \"lyvoc.com\"."
+  }
+}
