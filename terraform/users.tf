@@ -139,6 +139,13 @@ resource "terraform_data" "passwordless_link" {
       CONNECTION      = try(self.input.connection, "email")
     }
   }
+
+  # A new input alone is an in-place update, which runs no provisioner:
+  # replaced (unlinked, then linked again) when the account is recreated,
+  # Terraform or not (deleted by hand, recreated at the next apply)
+  lifecycle {
+    replace_triggered_by = [auth0_user.test[each.key].id]
+  }
 }
 
 # Former separate passwordless users: forgotten, not deleted (the link script
