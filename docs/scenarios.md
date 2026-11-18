@@ -30,7 +30,7 @@ The portal's **Token** page decodes the tokens. The demo's claims, set by the `A
 | Claim | Content |
 |---|---|
 | `https://acme.demo/app_roles` | Application roles (application access) |
-| `https://acme.demo/org_roles` | Roles in the login organization (organization login only) |
+| `https://acme.demo/org_roles` | Roles in the login organization (organization login only): each organization has its own, `<display name> - Member` / `- Admin` |
 | `https://acme.demo/organizations` | The user's organizations |
 | `https://acme.demo/permissions` | Permissions of the application role + the organization role |
 | `org_id` | Organization of the login (organization login only) |
@@ -55,9 +55,9 @@ The portal's **Token** page decodes the tokens. The demo's claims, set by the `A
 
 | # | Steps | Expected |
 |---|---|---|
-| 2.1 Branded login | Welcome page, **Log In to Acme France**, `acme-customer@example.com` | Login page with Acme France's logo and colors. `org_id` = Acme France, `org_roles: ["member"]`, `permissions: ["read:data","read:organization"]` |
-| 2.2 Organization admin | **Log In to Acme France**, `acme-admin@example.com` | `org_roles: ["admin"]`, permissions also `update:organization` and `manage:members` |
-| 2.3 Several organizations | `acme-multi@example.com` to **Acme France**, log out, then to **Acme Spain** | France: `org_roles: ["member"]`; Spain (orange page): `org_roles: ["admin"]`. `app_roles: ["buyer"]` in both |
+| 2.1 Branded login | Welcome page, **Log In to Acme France**, `acme-customer@example.com` | Login page with Acme France's logo and colors. `org_id` = Acme France, `org_roles: ["Acme France - Member"]`, `permissions: ["read:data","read:organization"]` |
+| 2.2 Organization admin | **Log In to Acme France**, `acme-admin@example.com` | `org_roles: ["Acme France - Admin"]`, permissions also `update:organization` and `manage:members` |
+| 2.3 Several organizations | `acme-multi@example.com` to **Acme France**, log out, then to **Acme Spain** | France: `org_roles: ["Acme France - Member"]`; Spain (orange page): `org_roles: ["Acme Spain - Admin"]`. `app_roles: ["buyer"]` in both |
 | 2.4 Not a member | **Log In to Acme Spain** with `acme-customer@example.com` | Denied: "user … is not part of the org_… organization" |
 
 **Talking point (2.3)**: the same person, a different role in each company they work with; the application receives the role of the organization they chose.
@@ -91,8 +91,8 @@ On localhost Auth0 asks the consent to the web application at each account's fir
 
 | # | Steps in the Admin UI | Then in the portal | Expected |
 |---|---|---|---|
-| 5.1 Give an application access | Users, `acme-no-app`, **Add application**: Acme Portal, buyer | **Log In to Acme Spain** as `acme-no-app` | Allowed: `app_roles: ["buyer"]`, `org_roles: ["member"]` |
-| 5.2 Add to an organization | Users, `acme-direct`, **Add organization**: Acme France, member (no application) | **Log In to Acme France** as `acme-direct` | Allowed: `org_roles: ["member"]` |
+| 5.1 Give an application access | Users, `acme-no-app`, **Add application**: Acme Portal, buyer | **Log In to Acme Spain** as `acme-no-app` | Allowed: `app_roles: ["buyer"]`, `org_roles: ["Acme Spain - Member"]` |
+| 5.2 Add to an organization | Users, `acme-direct`, **Add organization**: Acme France, role Member (no application) | **Log In to Acme France** as `acme-direct` | Allowed: `org_roles: ["Acme France - Member"]` |
 | 5.3 Remove an access | Users, `acme-direct`, Applications card: remove `buyer` | Login without organization as `acme-direct` | Denied |
 | 5.4 Remove from an organization | Users, `acme-customer`, Organizations card: **Delete** on Acme France | **Log In to Acme France** as `acme-customer` | Denied: not a member |
 | 5.5 Create a user | **Create user**: database `users-db`, an address of the presenter's mailbox (e.g. `firstname.lastname+new@…`), organization and application role | Choose the password from the email received, then log in | The account follows the same rules |
@@ -107,14 +107,14 @@ Run `terraform apply` afterwards: it puts the test accounts back.
 |---|---|---|
 | 6.1 Scoped list | Users | Only the members of Acme France, with their organizations and application roles. `acme-no-app` and `acme-direct` (other organization, none) are not listed |
 | 6.2 Create a user | **Create User**: an `example.com` address, password, organization role `member`, application role `Acme Portal:buyer` | The dialog closes. After a few seconds and a refresh, the user is listed with `acme-france` and `Acme Portal:buyer` (completed by the `Acme - DAE assignment` Action). Visible in the Admin UI too |
-| 6.3 Its login | Portal, **Log In to Acme France** with the new account | `app_roles: ["buyer"]`, `org_roles: ["member"]` |
+| 6.3 Its login | Portal, **Log In to Acme France** with the new account | `app_roles: ["buyer"]`, `org_roles: ["Acme France - Member"]` |
 | 6.4 Change a role | The user, **Actions > Change Profile**: application role `Acme Portal:b2b_customer` | The list shows the new role |
 | 6.5 Delete | The user, **Actions > Delete** | The user is gone |
 | 6.6 Rights per organization | Log out of the DAE, log in as `acme-multi@example.com`. Open a user of each organization, try **Actions > Block**, then **Create User** | Both organizations listed. Acme France: read-only ("Read-only: you are not an admin of this user's organizations."). Acme Spain: the actions work. **Create User**: no Organization field (a single organization managed), the field reads "Organization role in acme-spain", and the new user is listed in `acme-spain` |
 | 6.7 DAE roles | Log in as `acme-dae-user@example.com`, then `acme-multi@example.com`, then `acme-admin@example.com` | User: users only. Operator: users and **Logs**. Administrator: also **Configuration** (hooks), in the menu under the name |
 | 6.8 Auditor: read-only | Log in as `acme-customer@example.com` | The users of Acme France are listed and can be opened, without **Create User**; any action is refused ("Auditors have read-only access.") |
 
-The rights inside an organization follow the organization role: a DAE role manages the users of the organizations where the account is `admin`, and only reads the ones where it is `member` (see [dae-hooks/README.md](../dae-hooks/README.md#rights-per-organization)).
+The rights inside an organization follow the organization role: a DAE role manages the users of the organizations where the account holds the organization's Admin role (`<organization> - Admin`), and only reads the ones where it holds its Member role (see [dae-hooks/README.md](../dae-hooks/README.md#rights-per-organization)).
 
 **Talking point**: the DAE does the job with Auth0's own tool (no success message, the list needs a refresh after a creation); the Admin UI covers the same needs with a richer experience (notifications, applications, invitations, logs).
 

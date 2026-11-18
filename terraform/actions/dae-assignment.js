@@ -53,7 +53,9 @@ exports.onExecutePostUserRegistration = async (event) => {
   const id = encodeURIComponent(event.user.user_id)
   const org = await api("GET", `/organizations/name/${encodeURIComponent(pending.organization)}`)
   await api("POST", `/organizations/${org.id}/members`, { members: [event.user.user_id] })
-  const orgRole = await findRole(pending.org_role || "member")
+  // The organization's own role of that kind: "<display name> - Member" / "- Admin"
+  const kind = pending.org_role === "admin" ? "Admin" : "Member"
+  const orgRole = await findRole(`${org.display_name || org.name} - ${kind}`)
   await api("POST", `/organizations/${org.id}/members/${id}/roles`, { roles: [orgRole.id] })
 
   const direct = await Promise.all([pending.app_role, pending.dae_role].filter(Boolean).map(findRole))

@@ -101,7 +101,7 @@ Copy `customers/acme.tfvars` to `customers/<slug>.tfvars` and set:
 
 - `customer`: slug, name, logo and colors (the SPA theme, and the default branding of the organizations);
 - `organizations`: name, display name and optional logo / colors of each organization;
-- `test_users`: alias (email through `test_users_email_template`), name, `organizations` (`organization = "member"` or `"admin"`), `roles` (application roles), `receives_emails` (real mailbox and passwordless login; otherwise `<alias>@example.com`), `locale` (interface language, `en` or `fr`: `user_metadata.locale`, the user's own choice, read by the Admin UI and the applications; default `test_users_locale`, `en`) and app_metadata (`dae_role`: Delegated Administration extension role, given as a direct role);
+- `test_users`: alias (email through `test_users_email_template`), name, `organizations` (`organization = "member"` or `"admin"`: the organization's own role, `<display name> - Member` / `- Admin`, created by Terraform with the permissions of `organization_roles`), `roles` (application roles), `receives_emails` (real mailbox and passwordless login; otherwise `<alias>@example.com`), `locale` (interface language, `en` or `fr`: `user_metadata.locale`, the user's own choice, read by the Admin UI and the applications; default `test_users_locale`, `en`) and app_metadata (`dae_role`: Delegated Administration extension role, given as a direct role);
 - optionally `app_name`, `roles`, `claims_namespace`, `spa_urls` / `web_app_urls` (deployed demo URLs).
 
 ## What the customer variables drive

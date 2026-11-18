@@ -17,8 +17,9 @@ function (ctx, callback) {
   var DOMAIN = '__MANAGEMENT_DOMAIN__';
   var CLIENT_ID = '__CLIENT_ID__';
   var CLIENT_SECRET = '__CLIENT_SECRET__';
-  // Organization role giving the right to manage the organization's users
-  var MANAGER_ORG_ROLE = 'admin';
+  // Organization role giving the right to manage the organization's users:
+  // each organization has its own, "<display name> - Admin"
+  var MANAGER_ORG_ROLE_SUFFIX = ' - Admin';
   var READ_ACTIONS = ['read:user', 'read:devices', 'read:logs'];
 
   var token;
@@ -62,13 +63,14 @@ function (ctx, callback) {
     return api('/users/' + encodeURIComponent(userId) + '/organizations?per_page=100');
   }
 
-  // Names of the organizations where the user holds MANAGER_ORG_ROLE (live)
+  // Names of the organizations where the user holds its manager role (live)
   function managedOrganizations(userId) {
     var id = encodeURIComponent(userId);
     return organizationsOf(userId).then(function (orgs) {
       return Promise.all(orgs.map(function (org) {
         return api('/organizations/' + org.id + '/members/' + id + '/roles?per_page=100').then(function (roles) {
-          return roles.some(function (role) { return role.name === MANAGER_ORG_ROLE; }) ? org.name : null;
+          var managerRole = (org.display_name || org.name) + MANAGER_ORG_ROLE_SUFFIX;
+          return roles.some(function (role) { return role.name === managerRole; }) ? org.name : null;
         });
       }));
     }).then(function (names) { return names.filter(Boolean); });

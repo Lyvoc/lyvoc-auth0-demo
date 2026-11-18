@@ -5,7 +5,7 @@
  * - application access: a role of the demo application ("<application>:<role>"),
  *   held directly. Users without one are denied, organization member or not.
  * - organizations: membership (checked by Auth0 on an organization login),
- *   with an organization role ("member", "admin").
+ *   with the organization's own role ("<display name> - Member" / "- Admin").
  *
  * On an organization login the token only holds the organization's roles: the
  * application roles are then read from app_metadata.roles[<application>]._direct,
@@ -19,7 +19,8 @@
  * - app_metadata (ID token only)
  *
  * Secrets: DEMO_CLIENT_IDS (comma-separated), CLAIMS_NAMESPACE, ROLE_PREFIX,
- * ROLE_PERMISSIONS (JSON: role name => permissions).
+ * ROLE_PERMISSIONS (JSON: application role name, or organization role kind
+ * "admin" / "member" => permissions).
  */
 exports.onExecutePostLogin = async (event, api) => {
   const clientIds = (event.secrets.DEMO_CLIENT_IDS || "").split(",")
@@ -43,9 +44,19 @@ exports.onExecutePostLogin = async (event, api) => {
     return
   }
 
+  // The login organization's roles: "<display name> - Admin" / "- Member",
+  // each organization has its own; their permissions are the kind's
+  // (ROLE_PERMISSIONS "admin" / "member")
   const orgRoles = event.organization ? tokenRoles.filter((role) => !role.includes(":")) : []
+  const orgRoleKind = (role) => {
+    const match = role.match(/ - (admin|member)$/i)
+    return match ? match[1].toLowerCase() : role
+  }
   const permissions = [
-    ...new Set([...appRoles, ...orgRoles].flatMap((role) => permissionsByRole[role] || [])),
+    ...new Set([
+      ...appRoles.flatMap((role) => permissionsByRole[role] || []),
+      ...orgRoles.flatMap((role) => permissionsByRole[orgRoleKind(role)] || []),
+    ]),
   ]
 
   const claims = {

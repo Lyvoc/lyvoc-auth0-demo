@@ -1,23 +1,23 @@
 # Delegated Administration extension (DAE) hooks
 
-The DAE is Auth0's delegated user management extension, shown next to the Admin UI. A delegated admin (DAE role `Delegated Admin - …`, e.g. `acme-admin`) manages **the users of their own organizations** only, with the demo's access model: the users it creates are organization members with an organization role (`member`, `admin`), an application role held directly (application access) and an optional DAE role. They show in the Admin UI like any other user.
+The DAE is Auth0's delegated user management extension, shown next to the Admin UI. A delegated admin (DAE role `Delegated Admin - …`, e.g. `acme-admin`) manages **the users of their own organizations** only, with the demo's access model: the users it creates are organization members with the organization's own role (`<organization> - Member` / `- Admin`), an application role held directly (application access) and an optional DAE role. They show in the Admin UI like any other user.
 
 | Hook | Role |
 |---|---|
 | `filter-hook.js` | The users listed: those of the admin's organizations (`app_metadata.organizations`) |
-| `access-hook.js` | What the admin may do on a user: read the users of their organizations; change them (edit, delete, block, password…) only in the organizations where the admin is organization `admin`; `Delegated Admin - Auditor` is read-only |
-| `memberships-query-hook.js` | The organizations offered in the Create User dialog: the ones where the admin is organization `admin` |
-| `settings-query-hook.js` | The forms: organization role, application role (the admin's applications), DAE role (never above the admin's own); Create User only for an organization `admin` who is not an Auditor; organizations and application roles in the users list |
-| `write-hook.js` | Creation (account in the users database, the membership and roles left in `app_metadata.dae_pending` for the `<Customer> - DAE assignment` Action) and profile changes (application and DAE roles), only in the organizations where the admin is organization `admin`, never by an Auditor |
+| `access-hook.js` | What the admin may do on a user: read the users of their organizations; change them (edit, delete, block, password…) only in the organizations where the admin holds the organization's Admin role; `Delegated Admin - Auditor` is read-only |
+| `memberships-query-hook.js` | The organizations offered in the Create User dialog: the ones where the admin holds the organization's Admin role |
+| `settings-query-hook.js` | The forms: organization role, application role (the admin's applications), DAE role (never above the admin's own); Create User only for an organization Admin who is not an Auditor; organizations and application roles in the users list |
+| `write-hook.js` | Creation (account in the users database, the membership and roles left in `app_metadata.dae_pending` for the `<Customer> - DAE assignment` Action) and profile changes (application and DAE roles), only in the organizations where the admin holds the organization's Admin role, never by an Auditor |
 
 ### Rights per organization
 
-The rights follow the **organization role**, the same as in the rest of the demo (`admin` holds `manage:members`):
+The rights follow the **organization role**, the same as in the rest of the demo: each organization has its own, `<display name> - Admin` (holds `manage:members`) and `<display name> - Member`:
 
 | Admin's organization role | In the DAE |
 |---|---|
-| `admin` | Manages the organization's users (create, edit, delete, block…), within the limits of their DAE role |
-| `member` | Reads the organization's users only |
+| `<organization> - Admin` | Manages the organization's users (create, edit, delete, block…), within the limits of their DAE role |
+| `<organization> - Member` | Reads the organization's users only |
 
 The organization roles are read live from Auth0 (Management API) by the Access, Memberships, Settings and Write hooks, never from the `app_metadata` cache (the extension also caches the admin's profile). The DAE role sets what the extension itself shows:
 

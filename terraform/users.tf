@@ -87,7 +87,8 @@ resource "auth0_user_roles" "test" {
   )
 }
 
-# Organizations: membership with the organization role (member or admin)
+# Organizations: membership with the organization's own role ("<display
+# name> - Member" or "- Admin")
 resource "auth0_organization_member" "test" {
   for_each = local.memberships
 
@@ -100,7 +101,7 @@ resource "auth0_organization_member_roles" "test" {
 
   organization_id = auth0_organization.this[each.value.org].id
   user_id         = auth0_user.test[each.value.alias].id
-  roles           = [data.auth0_role.organization[each.value.role].id]
+  roles           = [auth0_role.org["${each.value.org}/${each.value.role}"].id]
 
   depends_on = [auth0_organization_member.test]
 }

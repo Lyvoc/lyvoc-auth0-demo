@@ -94,6 +94,13 @@ variable "organizations" {
     condition     = alltrue([for name in keys(var.organizations) : can(regex("^[a-z0-9][a-z0-9_-]{0,49}$", name))])
     error_message = "organizations: names are lowercase letters, digits, hyphens or underscores (50 max)."
   }
+
+  # The organization's roles are named after the display name ("<display
+  # name> - Admin"): no ":" (application roles "<App>:<role>"), unique
+  validation {
+    condition     = alltrue([for org in values(var.organizations) : !strcontains(org.display_name, ":")]) && length(distinct([for org in values(var.organizations) : lower(trimspace(org.display_name))])) == length(var.organizations)
+    error_message = "organizations: display names are unique and contain no \":\" (the organization's roles are named after them)."
+  }
 }
 
 variable "applications" {
@@ -138,7 +145,7 @@ variable "applications" {
 }
 
 variable "organization_roles" {
-  description = "Permissions on the demo API of the organization roles (member, admin). The roles are the Admin UI's tenant-wide ones, shared by every customer: they must exist on the tenant (looked up, never created here)."
+  description = "Permissions on the demo API of the organization roles, per kind (member, admin): given to each organization's own roles (\"<display name> - Member\" / \"- Admin\", created here) and to the Admin UI's templates \"member\" / \"admin\" (looked up, never created here: an organization created in the Admin UI copies them)."
   type        = map(list(string))
   default = {
     member = ["read:organization"]

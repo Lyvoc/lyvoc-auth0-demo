@@ -304,8 +304,8 @@ const MESSAGES = defineMessages(
     addOrgTitle: "Add to an organization",
     addOrgSteps: (email: N, org: string, button: N) => (
       <>
-        Admin UI: Users, {email}, <B>Add organization</B>: {org}, member (no application). Then {button} as this
-        account
+        Admin UI: Users, {email}, <B>Add organization</B>: {org}, role Member (no application). Then {button} as
+        this account
       </>
     ),
     removeAccessTitle: "Remove an access",
@@ -627,7 +627,7 @@ const MESSAGES = defineMessages(
     addOrgTitle: "Ajouter à une organisation",
     addOrgSteps: (email, org, button) => (
       <>
-        Admin UI : Utilisateurs, {email}, <B>Ajouter une organisation</B> : {org}, member (sans application). Puis{" "}
+        Admin UI : Utilisateurs, {email}, <B>Ajouter une organisation</B> : {org}, rôle Member (sans application). Puis{" "}
         {button} avec ce compte
       </>
     ),
@@ -773,6 +773,11 @@ const useScenarios = (): Scenario[] => {
   const noApp = testUsers.find((u) => u.memberships.length > 0 && u.roles.length === 0);
 
   const orgByName = (name?: string) => organizations.find((o) => o.name === name);
+  // Each organization has its own roles: "<display name> - Member" / "- Admin"
+  const orgRoleName = (orgName: string | undefined, role: string | undefined) =>
+    orgName && role
+      ? `${orgByName(orgName)?.displayName ?? orgName} - ${role === "admin" ? "Admin" : "Member"}`
+      : "";
   const mainOrg: DemoOrganization | undefined = orgByName(customerUser?.memberships[0]?.organization) ?? organizations[0];
   const otherOrg: DemoOrganization | undefined =
     orgByName(noApp?.memberships[0]?.organization) ?? organizations.find((o) => o !== mainOrg);
@@ -827,7 +832,7 @@ const useScenarios = (): Scenario[] => {
                 </td>
                 <td style={tdStyle}>
                   {u.memberships
-                    .map((ms) => `${orgByName(ms.organization)?.displayName ?? ms.organization} (${ms.role})`)
+                    .map((ms) => orgRoleName(ms.organization, ms.role))
                     .join(", ") || m.noOrganization}
                 </td>
                 <td style={tdStyle}>{u.roles.join(", ") || m.noRole}</td>
@@ -931,7 +936,7 @@ const useScenarios = (): Scenario[] => {
       ),
       expected: m.brandedExpected(
         mainOrg.displayName,
-        <C>org_roles: {json([roleIn(customerUser, mainOrg.name) ?? ""])}</C>
+        <C>org_roles: {json([orgRoleName(mainOrg.name, roleIn(customerUser, mainOrg.name))])}</C>
       ),
       action: loginOrg(mainOrg),
     });
@@ -945,7 +950,7 @@ const useScenarios = (): Scenario[] => {
           <B>{m.logInTo(mainOrg.displayName)}</B>, <C>{admin.email}</C>
         </>
       ),
-      expected: m.orgAdminExpected(<C>org_roles: {json([roleIn(admin, mainOrg.name) ?? ""])}</C>),
+      expected: m.orgAdminExpected(<C>org_roles: {json([orgRoleName(mainOrg.name, roleIn(admin, mainOrg.name))])}</C>),
       action: loginOrg(mainOrg),
     });
   }
@@ -959,7 +964,7 @@ const useScenarios = (): Scenario[] => {
         multi.memberships.map((ms, i) => (
           <span key={ms.organization}>
             {i > 0 && "; "}
-            {orgByName(ms.organization)?.displayName}{m.colon} <C>org_roles: {json([ms.role])}</C>
+            {orgByName(ms.organization)?.displayName}{m.colon} <C>org_roles: {json([orgRoleName(ms.organization, ms.role)])}</C>
           </span>
         )),
         <C>app_roles: {json(multi.roles)}</C>
@@ -1070,7 +1075,7 @@ const useScenarios = (): Scenario[] => {
         steps: m.giveAccessSteps(<C>{noApp.email}</C>, appName, role, <B>{m.logInTo(org?.displayName ?? "")}</B>),
         expected: m.allowed(
           <>
-            <C>app_roles: {json([role])}</C>, <C>org_roles: {json([noApp.memberships[0]?.role ?? ""])}</C>
+            <C>app_roles: {json([role])}</C>, <C>org_roles: {json([orgRoleName(noApp.memberships[0]?.organization, noApp.memberships[0]?.role)])}</C>
           </>
         ),
         action: org && loginOrg(org),
@@ -1081,7 +1086,7 @@ const useScenarios = (): Scenario[] => {
         id: "5.2",
         title: m.addOrgTitle,
         steps: m.addOrgSteps(<C>{direct.email}</C>, mainOrg.displayName, <B>{m.logInTo(mainOrg.displayName)}</B>),
-        expected: m.allowed(<C>org_roles: ["member"]</C>),
+        expected: m.allowed(<C>org_roles: {json([orgRoleName(mainOrg.name, "member")])}</C>),
         action: loginOrg(mainOrg),
       });
       adminSteps.push({
@@ -1185,7 +1190,7 @@ const useScenarios = (): Scenario[] => {
         steps: m.daeLoginSteps(<B>{m.logInTo(daeOrg.displayName)}</B>),
         expected: (
           <>
-            <C>app_roles: {json([role])}</C>, <C>org_roles: ["member"]</C>
+            <C>app_roles: {json([role])}</C>, <C>org_roles: {json([orgRoleName(daeOrg.name, "member")])}</C>
           </>
         ),
         action: loginOrg(daeOrg),
