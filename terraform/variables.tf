@@ -280,10 +280,11 @@ variable "admin_ui_url" {
 }
 
 variable "tenant_login" {
-  description = "Tenant-wide login settings, set in ONE workspace of the tenant only (null in the others: they would fight over them). identifier_first: the email first, then the password (required by domain detection). domain_connections: domain detection, connection name => email domains sent straight to it (only its domains are set, never its other options; the connection must exist, e.g. the Admin UI's Okta created from Admin team > SSO)."
+  description = "Tenant-wide login settings, set in ONE workspace of the tenant only (null in the others: they would fight over them). identifier_first: the email first, then the password (required by domain detection). domain_connections: domain detection, connection name => email domains sent straight to it (only its domains are set, never its other options; the connection must exist, e.g. the Admin UI's Okta created from Admin team > SSO). forward_login_hint: these connections forward the login request's login_hint (the invitee's email, added by the Admin UI) to the identity provider, which pre-fills it."
   type = object({
     identifier_first   = optional(bool, true)
     domain_connections = optional(map(list(string)), {})
+    forward_login_hint = optional(bool, true)
   })
   default = null
 

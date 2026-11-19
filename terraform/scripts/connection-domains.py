@@ -2,12 +2,18 @@
 
 Home realm discovery: with identifier-first login, an email of one of these
 domains is sent straight to the connection (e.g. @lyvoc.com to the Admin UI's
-Okta). Only `options.domain_aliases` changes: the connection's other options
-(its client secret included) are read and sent back as they are, never stored
-in Terraform. Nothing is written when the domains are already set.
+Okta). With FORWARD_LOGIN_HINT, the `login_hint` of the login request (e.g.
+the invitee's email, added by the Admin UI) is forwarded to the identity
+provider, which pre-fills it (upstream_params).
+
+Only `options.domain_aliases` and `options.upstream_params.login_hint`
+change: the connection's other options (its client secret included) are read
+and sent back as they are, never stored in Terraform. Nothing is written
+when they are already set.
 
 Environment: AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET (Terraform's
-credentials), CONNECTION (connection name), DOMAINS (JSON list of domains).
+credentials), CONNECTION (connection name), DOMAINS (JSON list of domains),
+FORWARD_LOGIN_HINT ("true" / "false").
 """
 
 import json
@@ -19,6 +25,7 @@ import urllib.request
 domain = os.environ["AUTH0_DOMAIN"]
 connection_name = os.environ["CONNECTION"]
 domains = json.loads(os.environ["DOMAINS"])
+forward_login_hint = os.environ.get("FORWARD_LOGIN_HINT", "false") == "true"
 
 
 def request(method, path, body=None, token=None):
@@ -60,10 +67,23 @@ if connection is None:
     raise SystemExit(f'Connection "{connection_name}" not found (create it first, e.g. Admin UI > Admin team > SSO).')
 
 options = connection.get("options") or {}
-if sorted(options.get("domain_aliases") or []) == sorted(domains):
-    print(f'{connection_name}: domains already set ({", ".join(domains) or "none"})')
+upstream = dict(options.get("upstream_params") or {})
+if forward_login_hint:
+    upstream["login_hint"] = {"alias": "login_hint"}
+else:
+    upstream.pop("login_hint", None)
+
+summary = f'domains {", ".join(domains) or "none"}, login_hint {"forwarded" if forward_login_hint else "not forwarded"}'
+if sorted(options.get("domain_aliases") or []) == sorted(domains) and upstream == (
+    options.get("upstream_params") or {}
+):
+    print(f"{connection_name}: already set ({summary})")
     raise SystemExit(0)
 
 options["domain_aliases"] = domains
+if upstream:
+    options["upstream_params"] = upstream
+else:
+    options.pop("upstream_params", None)
 request("PATCH", f"/api/v2/connections/{connection['id']}", {"options": options}, token=token)
-print(f'{connection_name}: domains set ({", ".join(domains) or "none"})')
+print(f"{connection_name}: set ({summary})")
